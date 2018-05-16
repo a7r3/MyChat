@@ -247,6 +247,8 @@ public class ChatListFragment extends Fragment {
                             Map.Entry record = (Map.Entry) iterator.next();
                             if (ds.child("phoneNum").getValue(String.class).equals(record.getKey().toString())) {
 
+                                singleChat.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
+                                singleChat.setProfile_pic(ds.child("profile_pic").getValue(String.class));
                                 singleChat.setName(record.getValue().toString());
                                 chatList.add(0,singleChat);
                                 chatListAdapter.notifyDataSetChanged();

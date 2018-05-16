@@ -1,8 +1,10 @@
 package vipul.in.mychat.activity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -14,9 +16,12 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ViewPagerAdapter;
@@ -35,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
+
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +51,39 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
         mAuth = FirebaseAuth.getInstance();
         mRef = FirebaseDatabase.getInstance().getReference().child("Users");
+
+
+        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
+
+            editor.putString("initialized","YES");
+            mRef.child(mAuth.getCurrentUser().getUid()).child("profile_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    editor.putString("profile_pic",dataSnapshot.getValue(String.class));
+                    editor.apply();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            mRef.child(mAuth.getCurrentUser().getUid()).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    editor.putString("thumb_pic",dataSnapshot.getValue(String.class));
+                    editor.apply();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
         viewPager = findViewById(R.id.viewPager);
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId("ca-app-pub-6712400715312717/2525168130");
@@ -68,45 +110,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-        //mBtn = findViewById(R.id.query);
-        //mTextView = findViewById(R.id.list);
-        //mRef = FirebaseDatabase.getInstance().getReference().child("Users");
-
-        /*mBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                mRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                            String k = ds.child("phoneNum").getValue(String.class);
-                            Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
-                            while (phones.moveToNext())
-                            {
-                                String name=phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                                String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                                phoneNumber = phoneNumber.replace(" ","");
-                                Log.d(name,phoneNumber+""+k);
-                                if(k.contains(phoneNumber)) {
-                                    Log.d("Matched","Matched");
-                                    mTextView.setText(mTextView.getText().toString()+"\n"+name+": "+k);
-                                    break;
-                                }
-                            }
-                            phones.close();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-            }
-        });*/
         setupViewPager(viewPager);
 
     }
@@ -117,10 +120,10 @@ public class MainActivity extends AppCompatActivity {
 
         contacts = new ContactsFragment();
         chatListFragment = new ChatListFragment();
+//        profileFragment = new ProfileFragment();
         adapter.addFragment(chatListFragment, "CHATS");
         adapter.addFragment(contacts, "CONTACTS");
-        //adapter.addFragment(contacts,"CONTACTS");
-        //adapter.addFragment(contacts,"CONTACTS");
+//        adapter.addFragment(profileFragment,"PROFILE");
         viewPager.setAdapter(adapter);
 
     }
@@ -136,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
 
             FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("true");
-
         }
 
     }

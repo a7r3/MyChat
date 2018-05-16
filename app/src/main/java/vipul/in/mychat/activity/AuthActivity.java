@@ -120,7 +120,9 @@ public class AuthActivity extends AppCompatActivity {
                     reference.child("name").setValue(enterName.getText().toString());
                     reference.child("phoneNum").setValue(user.getPhoneNumber());
                     reference.child("device_token").setValue(FirebaseInstanceId.getInstance().getToken());
-
+                    reference.child("status").setValue("Hey there. I am using MyChat App");
+                    reference.child("profile_pic").setValue("default");
+                    reference.child("thumb_pic").setValue("default");
                     startActivity(new Intent(AuthActivity.this, MainActivity.class));
                     finish();
                 }

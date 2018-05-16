@@ -7,6 +7,10 @@ package vipul.in.mychat.model;
 // Descriptor Class for a User in this Application
 public class User {
 
+    private String thumb_pic;
+
+    private String profile_pic;
+
     // These variables are present inside the 'Chats' node
     // Has this user saw the last message sent by the current user ?
     private boolean seen;
@@ -113,5 +117,21 @@ public class User {
 
     public void setIsOnline(String isOnline) {
         this.isOnline = isOnline;
+    }
+
+    public String getThumb_pic() {
+        return thumb_pic;
+    }
+
+    public void setThumb_pic(String thumb_pic) {
+        this.thumb_pic = thumb_pic;
+    }
+
+    public String getProfile_pic() {
+        return profile_pic;
+    }
+
+    public void setProfile_pic(String profile_pic) {
+        this.profile_pic = profile_pic;
     }
 }

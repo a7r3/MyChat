@@ -1,6 +1,7 @@
 package vipul.in.mychat.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -55,12 +56,18 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     EmojiconEditText editText;
     View rootView;
 
+    SharedPreferences sharedPreferences;
+
+
     InterstitialAd mInterstitialAd;
     RewardedVideoAd mRewardedVideoAd;
 
     RecyclerView chatRecyclerView;
     Toolbar chat_toolbar;
     String senderUid;
+
+    String myThumb,friendThumb;
+
     private DatabaseReference mRef, rootDatabaseReference;
 
     @Override
@@ -69,6 +76,34 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         super.onStart();
         senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         receiverUid = getIntent().getStringExtra("uid");
+
+        DatabaseReference myReference = FirebaseDatabase.getInstance().getReference();
+
+        myReference.child("Users").child(senderUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                myThumb = dataSnapshot.getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+        myReference.child("Users").child(receiverUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                friendThumb = dataSnapshot.getValue(String.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("isOnline").setValue("true");
     }
 
@@ -80,12 +115,26 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         initializeAd();
 
-        messageAdapter = new MessageAdapter(msgList, this);
+        sharedPreferences = getSharedPreferences("userInfo",MODE_PRIVATE);
+
+        myThumb = sharedPreferences.getString("thumb_pic","default");
+        friendThumb = getIntent().getStringExtra("friendThumb");
+
+        Log.d("THUMBS",myThumb+" "+friendThumb);
+
+
+        receiverUid = getIntent().getStringExtra("uid");
+        senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+
+
+        messageAdapter = new MessageAdapter(msgList, this , myThumb , friendThumb);
         chatRecyclerView = findViewById(R.id.messageList);
 
         linearLayoutManager = new LinearLayoutManager(this);
         chatRecyclerView.setLayoutManager(linearLayoutManager);
         chatRecyclerView.setAdapter(messageAdapter);
+
 
         EmojIconActions emojIcon = new EmojIconActions(this, rootView, editText, emojiButton);
         emojIcon.setIconsIds(R.drawable.ic_keyboard_black_24dp, R.drawable.ic_insert_emoticon_black_24dp);
@@ -108,9 +157,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         rootDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         getExtra = getIntent().getStringExtra("clicked");
-        receiverUid = getIntent().getStringExtra("uid");
         userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
-        senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         chat_toolbar = findViewById(R.id.chat_toolbar);
         setSupportActionBar(chat_toolbar);
 

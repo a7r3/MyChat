@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/message_profile_layout"
             android:layout_width="36dp"
             android:layout_height="36dp"

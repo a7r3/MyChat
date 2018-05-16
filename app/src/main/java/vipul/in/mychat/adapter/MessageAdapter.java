@@ -1,6 +1,7 @@
 package vipul.in.mychat.adapter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,8 +10,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.Utils;
@@ -28,9 +32,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private final int INCOMING_MESSAGE_VIEW = 1;
     private final int DATE_VIEW = 2;
 
-    public MessageAdapter(List<Message> mMessageList, Context context) {
+    private String myThumb,friendThumb;
+
+    public MessageAdapter(List<Message> mMessageList, Context context , String myThumb , String friendThumb) {
+
         this.messageList = mMessageList;
         this.context = context;
+        this.myThumb = myThumb;
+        this.friendThumb = friendThumb;
+
     }
 
     @Override
@@ -72,6 +82,31 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.displayName.setText(from_user);
 
+        if(from_user.equals("Me")) {
+            if("default".equals(myThumb)) {
+
+                holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
+
+            }
+            else {
+
+                Picasso.get().load(Uri.parse(myThumb)).into(holder.profileImage);
+
+            }
+        }
+        else {
+            if("default".equals(friendThumb)) {
+
+                holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
+
+            }
+            else {
+
+                Picasso.get().load(Uri.parse(friendThumb)).into(holder.profileImage);
+
+            }
+        }
+
         // TODO: Support other media types
         if (message_type.equals("text")) {
             holder.messageView.setText(message.getMessage());
@@ -97,7 +132,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         private TextView displayName, messageTime;
         private EmojiconTextView messageView;
-        private ImageView profileImage;
+        private CircleImageView profileImage;
 
         MessageViewHolder(View v) {
             super(v);

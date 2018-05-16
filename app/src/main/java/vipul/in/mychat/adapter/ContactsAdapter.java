@@ -2,6 +2,7 @@ package vipul.in.mychat.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,11 +15,16 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.PicassoProvider;
 
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
+import vipul.in.mychat.activity.MainActivity;
 import vipul.in.mychat.model.User;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> {
@@ -47,7 +53,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
         final User contacts = contactsList.get(position);
         holder.name_from.setText(contacts.getName());
-        holder.last_message.setText(contacts.getPhoneNum());
+        holder.last_message.setText(contacts.getStatus());
 
         cUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -57,12 +63,21 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
+        if("default".equals(contacts.getThumb_pic())) {
+            holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
+        }
+        else {
+            Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
+        }
+
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("clicked",holder.name_from.getText().toString());
                 intent.putExtra("uid",contacts.getUid());
+                intent.putExtra("friendThumb",contacts.getThumb_pic());
+                intent.putExtra("friendProfilePic",contacts.getProfile_pic());
                 Log.d("Key","Key: "+contacts.getUid());
                 mContext.startActivity(intent);
             }
@@ -79,6 +94,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         RelativeLayout relativeLayout;
         TextView name_from,last_message;
         ImageView onlineIndicator;
+        CircleImageView thumbnail;
+
         public ContactsViewHolder(View itemView) {
 
             super(itemView);
@@ -86,6 +103,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             name_from = itemView.findViewById(R.id.user_name);
             last_message = itemView.findViewById(R.id.user_msg_or_contact);
             onlineIndicator = itemView.findViewById(R.id.online_indicator);
+            thumbnail = itemView.findViewById(R.id.user_single_image);
         }
     }
 }

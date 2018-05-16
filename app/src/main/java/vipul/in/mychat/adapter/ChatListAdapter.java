@@ -3,6 +3,7 @@ package vipul.in.mychat.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,8 +13,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.model.User;
@@ -51,10 +55,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.name_from.setText(singleChat.getName());
         holder.last_message.setText(singleChat.getLastMessage());
 
-//        if(!singleChat.isSeen()) {
-//            if(!singleChat.getKey().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))
-//                holder.name_from.setTypeface(null, BOLD);
-//        }
+        if("default".equals(singleChat.getThumb_pic())) {
+            holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
+        }
+        else {
+            Log.d("DEBUG",singleChat.getName());
+            Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
+        }
 
         if("true".equals(singleChat.getIsOnline())) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
@@ -69,11 +76,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
                 Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("clicked",singleChat.getName());
                 intent.putExtra("uid",singleChat.getUid());
+                intent.putExtra("friendThumb",singleChat.getThumb_pic());
+                intent.putExtra("friendProfilePic",singleChat.getProfile_pic());
                 mContext.startActivity(intent);
 
             }
         });
-
     }
 
     @Override
@@ -86,11 +94,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         RelativeLayout relativeLayout;
         TextView name_from,last_message;
         ImageView onlineIndicator;
+        CircleImageView thumbnail;
         public ChatListViewHolder(View itemView) {
 
             super(itemView);
             relativeLayout = itemView.findViewById(R.id.relativeSingleChat);
             name_from = itemView.findViewById(R.id.user_name);
+            thumbnail = itemView.findViewById(R.id.user_single_image);
             last_message = itemView.findViewById(R.id.user_msg_or_contact);
             onlineIndicator = itemView.findViewById(R.id.online_indicator);
         }
