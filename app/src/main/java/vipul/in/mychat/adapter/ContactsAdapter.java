@@ -1,0 +1,91 @@
+package vipul.in.mychat.adapter;
+
+import android.content.Context;
+import android.content.Intent;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+
+import java.util.List;
+
+import vipul.in.mychat.R;
+import vipul.in.mychat.activity.ChatActivity;
+import vipul.in.mychat.model.User;
+
+public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> {
+
+    private Context mCtx,mContext;
+    private List<User> contactsList;
+    private DatabaseReference dbRef;
+    private FirebaseUser cUser;
+
+    public ContactsAdapter(Context mCtx, List<User> contactsList) {
+        this.mCtx = mCtx;
+        this.contactsList = contactsList;
+    }
+
+    @Override
+    public ContactsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater layoutInflater = LayoutInflater.from(mCtx);
+        View view = layoutInflater.inflate(R.layout.user,null);
+        view.setClickable(true);
+        mContext = parent.getContext();
+        return new ContactsViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(final ContactsViewHolder holder, int position) {
+
+        final User contacts = contactsList.get(position);
+        holder.name_from.setText(contacts.getName());
+        holder.last_message.setText(contacts.getPhoneNum());
+
+        cUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if("true".equals(contacts.getIsOnline())) {
+            holder.onlineIndicator.setImageResource(R.drawable.online);
+        } else {
+            holder.onlineIndicator.setImageResource(R.drawable.offline);
+        }
+
+        holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext, ChatActivity.class);
+                intent.putExtra("clicked",holder.name_from.getText().toString());
+                intent.putExtra("uid",contacts.getUid());
+                Log.d("Key","Key: "+contacts.getUid());
+                mContext.startActivity(intent);
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return contactsList.size();
+    }
+
+    public class ContactsViewHolder extends RecyclerView.ViewHolder {
+
+        RelativeLayout relativeLayout;
+        TextView name_from,last_message;
+        ImageView onlineIndicator;
+        public ContactsViewHolder(View itemView) {
+
+            super(itemView);
+            relativeLayout = itemView.findViewById(R.id.relativeSingleChat);
+            name_from = itemView.findViewById(R.id.user_name);
+            last_message = itemView.findViewById(R.id.user_msg_or_contact);
+            onlineIndicator = itemView.findViewById(R.id.online_indicator);
+        }
+    }
+}
