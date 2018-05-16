@@ -1,6 +1,7 @@
 package vipul.in.mychat.adapter;
 
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -68,6 +70,30 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         } else {
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
+
+        holder.thumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog settingsDialog = new Dialog(mContext);
+                settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+                View myView = LayoutInflater.from(mContext).inflate(R.layout.myimagedialog
+                        , null);
+                settingsDialog.setContentView(myView);
+
+                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
+
+                if("default".equals(singleChat.getThumb_pic())) {
+                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
+                }
+                else {
+                    Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(imageView);
+                }
+
+                //imageView.setImageResource(R.drawable.ic_person_black_24dp);
+
+                settingsDialog.show();
+            }
+        });
 
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override

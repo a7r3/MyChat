@@ -1,5 +1,6 @@
 package vipul.in.mychat.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -82,7 +84,34 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
                 mContext.startActivity(intent);
             }
         });
+
+        holder.thumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog settingsDialog = new Dialog(mContext);
+                settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+                View myView = LayoutInflater.from(mCtx).inflate(R.layout.myimagedialog
+                        , null);
+                settingsDialog.setContentView(myView);
+
+                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
+
+                if("default".equals(contacts.getThumb_pic())) {
+                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
+                }
+                else {
+                    Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(imageView);
+                }
+
+                //imageView.setImageResource(R.drawable.ic_person_black_24dp);
+
+                settingsDialog.show();
+            }
+        });
+
     }
+
+
 
     @Override
     public int getItemCount() {
