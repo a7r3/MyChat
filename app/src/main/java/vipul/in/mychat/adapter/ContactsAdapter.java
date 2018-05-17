@@ -98,6 +98,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
                 if("default".equals(contacts.getThumb_pic())) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
+
                 }
                 else {
                     Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(imageView);

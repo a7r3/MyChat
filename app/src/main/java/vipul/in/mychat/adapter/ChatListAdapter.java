@@ -60,6 +60,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         if("default".equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         }
+//        else if(singleChat.getThumb_pic().equals(null)) {
+//            holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
+//        }
         else {
             Log.d("DEBUG",singleChat.getName());
             Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);

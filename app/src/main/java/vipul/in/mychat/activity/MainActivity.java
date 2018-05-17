@@ -27,6 +27,7 @@ import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ViewPagerAdapter;
 import vipul.in.mychat.fragment.ChatListFragment;
 import vipul.in.mychat.fragment.ContactsFragment;
+import vipul.in.mychat.fragment.MyProfile;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     //TextView mTextView;
     DatabaseReference mRef;
     private FirebaseAuth mAuth;
-    private android.support.v4.app.Fragment contacts, chatListFragment;
+    private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
     private FirebaseUser currentUser;
     private InterstitialAd mInterstitialAd;
     private TabLayout tabLayout;
@@ -49,39 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
-        mAuth = FirebaseAuth.getInstance();
-        mRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
-
-        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
-
-
-            editor.putString("initialized","YES");
-            mRef.child(mAuth.getCurrentUser().getUid()).child("profile_pic").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    editor.putString("profile_pic",dataSnapshot.getValue(String.class));
-                    editor.apply();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-            mRef.child(mAuth.getCurrentUser().getUid()).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    editor.putString("thumb_pic",dataSnapshot.getValue(String.class));
-                    editor.apply();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
 
 
         viewPager = findViewById(R.id.viewPager);
@@ -120,10 +89,10 @@ public class MainActivity extends AppCompatActivity {
 
         contacts = new ContactsFragment();
         chatListFragment = new ChatListFragment();
-//        profileFragment = new ProfileFragment();
+        myProfile = new MyProfile();
         adapter.addFragment(chatListFragment, "CHATS");
         adapter.addFragment(contacts, "CONTACTS");
-//        adapter.addFragment(profileFragment,"PROFILE");
+        adapter.addFragment(myProfile,"PROFILE");
         viewPager.setAdapter(adapter);
 
     }
@@ -132,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
+        mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             startActivity(new Intent(MainActivity.this, AuthActivity.class));
@@ -139,6 +109,39 @@ public class MainActivity extends AppCompatActivity {
         } else {
 
             FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("true");
+//            mAuth = FirebaseAuth.getInstance();
+            mRef = FirebaseDatabase.getInstance().getReference().child("Users");
+
+
+            sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+            editor = sharedPreferences.edit();
+
+
+            editor.putString("initialized","YES");
+            mRef.child(mAuth.getCurrentUser().getUid()).child("profile_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    editor.putString("profile_pic",dataSnapshot.getValue(String.class));
+                    editor.apply();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            mRef.child(mAuth.getCurrentUser().getUid()).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    editor.putString("thumb_pic",dataSnapshot.getValue(String.class));
+                    editor.apply();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
 
     }

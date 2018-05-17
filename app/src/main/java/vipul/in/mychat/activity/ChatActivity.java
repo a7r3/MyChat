@@ -8,7 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -45,9 +47,11 @@ import vipul.in.mychat.model.Message;
 public class ChatActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
     private String receiverUid;
+    private boolean typingStarted;
     private final String TAG = getClass().getSimpleName();
     private final List<Message> msgList = new ArrayList<>();
     String getExtra;
+    Boolean friendTyping = false;
     DatabaseReference userDatabaseReference;
     TextView receiverName, receiverLastSeen;
     LinearLayoutManager linearLayoutManager;
@@ -136,6 +140,9 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         chatRecyclerView.setAdapter(messageAdapter);
 
 
+
+
+
         EmojIconActions emojIcon = new EmojIconActions(this, rootView, editText, emojiButton);
         emojIcon.setIconsIds(R.drawable.ic_keyboard_black_24dp, R.drawable.ic_insert_emoticon_black_24dp);
         emojIcon.ShowEmojIcon();
@@ -152,6 +159,47 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 Log.e(TAG, "Keyboard Closed");
 //                chatRecyclerView.scrollToPosition(msgList.size() - 1);
             }
+
+        });
+
+
+
+
+        editText.addTextChangedListener(new TextWatcher() {
+
+
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            public void afterTextChanged(Editable s) {
+
+                if (!TextUtils.isEmpty(s.toString()) && s.toString().trim().length() == 1) {
+
+                    Log.d("TYPING", "typingStarted");
+
+                    typingStarted = true;
+                    FirebaseDatabase.getInstance().getReference().child("Chats").child(receiverUid).child(senderUid).child("typing").setValue(typingStarted);
+
+                    //send typing started status
+
+                } else if (s.toString().trim().length() == 0 && typingStarted) {
+
+                    Log.d("TYPING", "typingStopped");
+
+                    typingStarted = false;
+                    FirebaseDatabase.getInstance().getReference().child("Chats").child(receiverUid).child(senderUid).child("typing").setValue(typingStarted);
+                    //send typing stopped status
+
+                }
+
+            }
+
         });
 
         rootDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -185,6 +233,10 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
+        receiverName = findViewById(R.id.custom_person_name);
+        receiverLastSeen = findViewById(R.id.custom_person_lastSeen);
+        receiverName.setText(getExtra);
+
         rootDatabaseReference.child("Chats").child(senderUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -199,13 +251,37 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
-        receiverName = findViewById(R.id.custom_person_name);
-        receiverLastSeen = findViewById(R.id.custom_person_lastSeen);
-        receiverName.setText(getExtra);
+
+        mRef = FirebaseDatabase.getInstance().getReference().child("Chats").child(senderUid).child(receiverUid).child("typing");
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    if( dataSnapshot.getValue(Boolean.class) ) {
+                        receiverLastSeen.setText("Typing...");
+
+                        friendTyping = true;
+
+                    }
+                    else {
+                        friendTyping = false;
+                        watchLastSeen();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         rootDatabaseReference.child("Users").child(receiverUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 watchLastSeen();
+
             }
 
             @Override
@@ -381,34 +457,36 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     public void watchLastSeen() {
 
-        mRef = FirebaseDatabase.getInstance().getReference().child("Users").child(receiverUid);
-        mRef.child("isOnline").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if ("true".equals(dataSnapshot.getValue(String.class))) {
-                    receiverLastSeen.setText("Online");
-                } else {
-                    mRef.child("lastSeen").addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            long timeStamp = dataSnapshot.getValue(Long.class);
-                            Log.d(TAG, "LastSeen : " + timeStamp);
-                            receiverLastSeen.setText(Utils.getTimeAgo(timeStamp));
-                        }
+        if(!friendTyping) {
+            mRef = FirebaseDatabase.getInstance().getReference().child("Users").child(receiverUid);
+            mRef.child("isOnline").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if ("true".equals(dataSnapshot.getValue(String.class))) {
+                        receiverLastSeen.setText("Online");
+                    } else {
+                        mRef.child("lastSeen").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                long timeStamp = dataSnapshot.getValue(Long.class);
+                                Log.d(TAG, "LastSeen : " + timeStamp);
+                                receiverLastSeen.setText(Utils.getTimeAgo(timeStamp));
+                            }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
+                            }
+                        });
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
 
 
     }
