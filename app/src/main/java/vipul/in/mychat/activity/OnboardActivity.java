@@ -1,12 +1,15 @@
 package vipul.in.mychat.activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -19,8 +22,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.hbb20.CountryCodePicker;
 
@@ -181,10 +187,53 @@ public class OnboardActivity extends AppCompatActivity {
         }
     }
 
+    private final String TAG = getClass().getSimpleName();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboard);
+
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            Log.d(TAG, "USER IS NOTNULL");
+            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("true");
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference().child("Users");
+
+            SharedPreferences sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+            final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            editor.putString("initialized", "YES");
+            mRef.child(mAuth.getCurrentUser().getUid()).child("profile_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    editor.putString("profile_pic", dataSnapshot.getValue(String.class));
+                    editor.apply();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            mRef.child(mAuth.getCurrentUser().getUid()).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    editor.putString("thumb_pic", dataSnapshot.getValue(String.class));
+                    editor.apply();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
+
         countryCodePicker = findViewById(R.id.country_code_picker);
         inputBox = findViewById(R.id.editTextEmoji);
         sendMessageButton = findViewById(R.id.send_message_button);

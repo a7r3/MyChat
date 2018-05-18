@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <include layout="@layout/layout_toolbar" />
+        <include layout="@layout/main_app_bar" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabLayout"
@@ -19,10 +19,10 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
             app:tabGravity="fill"
-            app:tabIndicatorColor="#80DEEA"
+            app:tabIndicatorColor="@color/colorAccent"
             app:tabMode="fixed"
-            app:tabSelectedTextColor="#80DEEA"
-            app:tabTextColor="#ffffff" />
+            app:tabSelectedTextColor="@color/colorAccent"
+            app:tabTextColor="@color/colorAccent" />
 
     </android.support.design.widget.AppBarLayout>
 
