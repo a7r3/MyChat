@@ -139,10 +139,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         chatRecyclerView.setLayoutManager(linearLayoutManager);
         chatRecyclerView.setAdapter(messageAdapter);
 
-
-
-
-
         EmojIconActions emojIcon = new EmojIconActions(this, rootView, editText, emojiButton);
         emojIcon.setIconsIds(R.drawable.ic_keyboard_black_24dp, R.drawable.ic_insert_emoticon_black_24dp);
         emojIcon.ShowEmojIcon();
@@ -233,8 +229,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
-        receiverName = findViewById(R.id.custom_person_name);
-        receiverLastSeen = findViewById(R.id.custom_person_lastSeen);
+        receiverName = findViewById(R.id.chatPersonName);
+        receiverLastSeen = findViewById(R.id.chatLastSeen);
         receiverName.setText(getExtra);
 
         rootDatabaseReference.child("Chats").child(senderUid).addValueEventListener(new ValueEventListener() {
@@ -250,7 +246,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
             }
         });
-
 
         mRef = FirebaseDatabase.getInstance().getReference().child("Chats").child(senderUid).child(receiverUid).child("typing");
         mRef.addValueEventListener(new ValueEventListener() {

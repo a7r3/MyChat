@@ -73,7 +73,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
 
-        Log.d("LOLL", "onBind " + messageList.get(position).getMessage() );
         Message message = messageList.get(position);
         String from_user = message.getFrom();
         String message_type = message.getType();

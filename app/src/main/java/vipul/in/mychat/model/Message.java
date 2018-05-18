@@ -18,6 +18,13 @@ public class Message {
     // Currently only "text" (Standard Text) is supported
     private String type;
 
+    public Message(String message, long time, String from) {
+        this.message = message;
+        this.time = time;
+        this.from = from;
+        this.type = "text";
+    }
+
     public Message() {
         super();
     }
