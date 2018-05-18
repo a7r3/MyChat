@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -28,7 +27,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 
@@ -37,51 +35,43 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
 import vipul.in.mychat.R;
-import vipul.in.mychat.activity.MainActivity;
 
 import static android.app.Activity.RESULT_OK;
 
 
 public class MyProfile extends Fragment {
 
-    public MyProfile() {
-        // Required empty public constructor
-    }
-
-    private DatabaseReference mUserDatabase;
-    private FirebaseUser mCurrentUser;
+    private static final int GALLERY_PICK = 1;
+    Activity myActivity;
+    android.content.SharedPreferences sharedPreferences;
 
 
     //Android Layout
-
+    View rootView;
+    private DatabaseReference mUserDatabase;
+    private FirebaseUser mCurrentUser;
     private CircleImageView mDisplayImage;
     private TextView mName;
     private TextView mStatus;
-
     private Button mStatusBtn;
     private Button mImageBtn;
-
-    Activity myActivity;
-
-    android.content.SharedPreferences sharedPreferences;
-    private static final int GALLERY_PICK = 1;
-
     // Storage Firebase
     private StorageReference mImageStorage;
-    View rootView;
     private ProgressDialog mProgressDialog;
+    public MyProfile() {
+        // Required empty public constructor
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        rootView =  inflater.inflate(R.layout.fragment_my_profile, container, false);
+        rootView = inflater.inflate(R.layout.fragment_my_profile, container, false);
 
         myActivity = getActivity();
 
@@ -92,14 +82,13 @@ public class MyProfile extends Fragment {
         mStatusBtn = (Button) rootView.findViewById(R.id.settings_status_btn);
         mImageBtn = (Button) rootView.findViewById(R.id.settings_image_btn);
 
-        sharedPreferences = getContext().getSharedPreferences("userInfo",android.content.Context.MODE_PRIVATE);
+        sharedPreferences = getContext().getSharedPreferences("userInfo", android.content.Context.MODE_PRIVATE);
 
         mImageStorage = FirebaseStorage.getInstance().getReference();
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         final String current_uid = mCurrentUser.getUid();
-
 
 
         mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(current_uid);
@@ -118,18 +107,17 @@ public class MyProfile extends Fragment {
                 mName.setText(name);
                 mStatus.setText(status);
 
-                if(!image.equals("default")) {
+                if (!image.equals("default")) {
 
                     //Picasso.with(SettingsActivity.this).load(image).placeholder(R.drawable.default_avatar).into(mDisplayImage);
 
 
-                    android.util.Log.d("MYTAG",sharedPreferences.getString("profile_pic","default"));
+                    android.util.Log.d("MYTAG", sharedPreferences.getString("profile_pic", "default"));
 
-                    Picasso.get().load(Uri.parse(sharedPreferences.getString("profile_pic","default"))).placeholder(R.drawable.ic_person_black_24dp).into(mDisplayImage);
+                    Picasso.get().load(Uri.parse(sharedPreferences.getString("profile_pic", "default"))).placeholder(R.drawable.ic_person_black_24dp).into(mDisplayImage);
 
 
-                }
-                else {
+                } else {
                     mDisplayImage.setImageResource(R.drawable.ic_person_black_24dp);
                 }
 
@@ -166,11 +154,10 @@ public class MyProfile extends Fragment {
                     @Override
                     public void onClick(View view) {
 
-                        if(! newStatus.getText().toString().equals(null)&& ! newStatus.getText().toString().equals(""))
-                         {
-                             FirebaseDatabase.getInstance().getReference().child("Users").child(current_uid).child("status").setValue(newStatus.getText().toString());
-                             settingsDialog.dismiss();
-                         }
+                        if (!newStatus.getText().toString().equals(null) && !newStatus.getText().toString().equals("")) {
+                            FirebaseDatabase.getInstance().getReference().child("Users").child(current_uid).child("status").setValue(newStatus.getText().toString());
+                            settingsDialog.dismiss();
+                        }
                     }
 
                 });
@@ -200,26 +187,23 @@ public class MyProfile extends Fragment {
         });
 
 
-
         return rootView;
 
     }
-
-
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == GALLERY_PICK && resultCode == RESULT_OK){
+        if (requestCode == GALLERY_PICK && resultCode == RESULT_OK) {
 
             Uri imageUri = data.getData();
 
             CropImage.activity(imageUri)
                     .setAspectRatio(1, 1)
                     .setMinCropWindowSize(500, 500)
-                    .start(rootView.getContext(),MyProfile.this);
+                    .start(rootView.getContext(), MyProfile.this);
 
             //Toast.makeText(SettingsActivity.this, imageUri, Toast.LENGTH_LONG).show();
 
@@ -267,12 +251,11 @@ public class MyProfile extends Fragment {
                 final StorageReference thumb_filepath = mImageStorage.child("profile_images").child("thumbs").child(current_user_id + ".jpg");
 
 
-
                 filepath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
 
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
 
                             final String download_url = task.getResult().getDownloadUrl().toString();
 
@@ -283,7 +266,7 @@ public class MyProfile extends Fragment {
 
                                     String thumb_downloadUrl = thumb_task.getResult().getDownloadUrl().toString();
 
-                                    if(thumb_task.isSuccessful()){
+                                    if (thumb_task.isSuccessful()) {
 
                                         Map update_hashMap = new HashMap();
                                         update_hashMap.put("profile_pic", download_url);
@@ -293,7 +276,7 @@ public class MyProfile extends Fragment {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
 
-                                                if(task.isSuccessful()){
+                                                if (task.isSuccessful()) {
 
                                                     mProgressDialog.dismiss();
                                                     Picasso.get().load(Uri.parse(download_url)).into(mDisplayImage);
@@ -317,7 +300,6 @@ public class MyProfile extends Fragment {
                             });
 
 
-
                         } else {
 
                             //Toast.makeText(getParentFragment().getContext(), "Error in uploading.", Toast.LENGTH_LONG).show();
@@ -327,7 +309,6 @@ public class MyProfile extends Fragment {
 
                     }
                 });
-
 
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {

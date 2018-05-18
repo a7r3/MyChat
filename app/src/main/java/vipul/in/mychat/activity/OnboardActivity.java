@@ -2,7 +2,6 @@ package vipul.in.mychat.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +34,12 @@ import vipul.in.mychat.model.Message;
 
 public class OnboardActivity extends AppCompatActivity {
 
+    private final int ASK_PHONE_NUMBER = 0;
+    private final int ASK_OTP = 1;
+    private final int ASK_USER_NAME = 2;
+    private final int ASK_STATUS = 3;
+    private final int ASK_PROFILE_PICTURE = 4;
+    private final int FINAL_DESTINATION = 5;
     private List<Message> onboardConversation = new ArrayList<>();
     private RecyclerView onboardRecyclerView;
     private MessageAdapter messageAdapter;
@@ -44,14 +49,6 @@ public class OnboardActivity extends AppCompatActivity {
     private ImageButton sendMessageButton;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private String originalVerificationId;
-
-    private final int ASK_PHONE_NUMBER = 0;
-    private final int ASK_OTP = 1;
-    private final int ASK_USER_NAME = 2;
-    private final int ASK_STATUS = 3;
-    private final int ASK_PROFILE_PICTURE = 4;
-    private final int FINAL_DESTINATION = 5;
-
     private DatabaseReference databaseReference;
     private FirebaseUser user;
     private Handler handler = new Handler();
@@ -62,6 +59,7 @@ public class OnboardActivity extends AppCompatActivity {
 
     /**
      * Sends a message in the context of the Bot (the other member of this chat)
+     *
      * @param message The message to be displayed to the User
      */
     public void sendMessageAsBot(final String message) {
@@ -78,6 +76,7 @@ public class OnboardActivity extends AppCompatActivity {
 
     /**
      * Sends a message in the context of the User (who is being Onboarded)
+     *
      * @param message The message to be displayed
      */
     public void sendMessageAsUser(String message) {
@@ -111,7 +110,7 @@ public class OnboardActivity extends AppCompatActivity {
                 new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     @Override
                     public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-                           signInWithPhoneAuthCredential(phoneAuthCredential);
+                        signInWithPhoneAuthCredential(phoneAuthCredential);
                     }
 
                     @Override
@@ -139,7 +138,7 @@ public class OnboardActivity extends AppCompatActivity {
     // 6. (Final Destination) Send Onboard Completion Acknowledgement
     //    |-> Open up MainActivity
     private void onboardUser() {
-        switch(onboardStage) {
+        switch (onboardStage) {
             case ASK_PHONE_NUMBER:
                 sendMessageAsBot("Select your Country code, and enter your Mobile Number");
                 inputBox.setHint("Enter Mobile Number");
@@ -205,10 +204,10 @@ public class OnboardActivity extends AppCompatActivity {
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch(onboardStage) {
+                switch (onboardStage) {
                     case ASK_PHONE_NUMBER:
                         // If the provided number is not valid
-                        if(!countryCodePicker.isValidFullNumber()) {
+                        if (!countryCodePicker.isValidFullNumber()) {
                             sendMessageAsBot("Please enter a valid mobile number");
                             return;
                         }

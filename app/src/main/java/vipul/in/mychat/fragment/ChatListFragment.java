@@ -24,7 +24,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,25 +38,22 @@ import java.util.Map;
 
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ChatListAdapter;
-import vipul.in.mychat.adapter.UserAdapter;
 import vipul.in.mychat.model.User;
 
 
 public class ChatListFragment extends Fragment {
 
+    private final String TAG = getClass().getSimpleName();
+    User newOne;
+    User singleChatChange;
+    HashMap<String, String> hashMap2;
+    DatabaseReference mRef;
     private RecyclerView chatListRecycler;
     private List<User> chatList;
     private ChatListAdapter chatListAdapter;
     private Context context;
-    User newOne;
     private DatabaseReference chatDatabaseReference;
     private String currUid;
-
-    User singleChatChange;
-    private final String TAG = getClass().getSimpleName();
-
-    HashMap<String,String> hashMap2;
-    DatabaseReference mRef;
 
     public ChatListFragment() {
         // Required empty public constructor
@@ -79,9 +75,6 @@ public class ChatListFragment extends Fragment {
         chatListRecycler.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
         chatListRecycler.setLayoutManager(linearLayoutManager);
         chatListRecycler.setAdapter(chatListAdapter);
-
-
-
 
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
@@ -118,23 +111,23 @@ public class ChatListFragment extends Fragment {
 
 
                 User newChat = dataSnapshot.getValue(User.class);
-                Log.d("MYBIG",newChat.getPhoneNum()+" --number");
+                Log.d("MYBIG", newChat.getPhoneNum() + " --number");
                 ListIterator<User> listIterator = chatList.listIterator();
                 int tempFlag = 0;
                 while (listIterator.hasNext()) {
-                    if(listIterator.next().getPhoneNum().equals(dataSnapshot.child("phoneNum").getValue(String.class))) {
+                    if (listIterator.next().getPhoneNum().equals(dataSnapshot.child("phoneNum").getValue(String.class))) {
                         int index = listIterator.nextIndex();
-                        Log.d("MYBIG",chatList.get(index-1).getPhoneNum()+" --compare_number");
-                        newChat.setTimestamp(chatList.get(index-1).getTimestamp());
-                        newChat.setLastMessage(chatList.get(index-1).getLastMessage());
-                        newChat.setSeen(chatList.get(index-1).isSeen());
-                        newChat.setUid(chatList.get(index-1).getUid());
-                        newChat.setName(chatList.get(index-1).getName());
-                        chatList.remove(index-1);
-                        chatList.add(index-1,newChat);
+                        Log.d("MYBIG", chatList.get(index - 1).getPhoneNum() + " --compare_number");
+                        newChat.setTimestamp(chatList.get(index - 1).getTimestamp());
+                        newChat.setLastMessage(chatList.get(index - 1).getLastMessage());
+                        newChat.setSeen(chatList.get(index - 1).isSeen());
+                        newChat.setUid(chatList.get(index - 1).getUid());
+                        newChat.setName(chatList.get(index - 1).getName());
+                        chatList.remove(index - 1);
+                        chatList.add(index - 1, newChat);
                         tempFlag = 1;
                     }
-                    if(tempFlag == 1) {
+                    if (tempFlag == 1) {
                         chatListAdapter.notifyDataSetChanged();
                         break;
                     }
@@ -281,8 +274,6 @@ public class ChatListFragment extends Fragment {
         phones.close();
 
 
-
-
         mRef = FirebaseDatabase.getInstance().getReference();
 
         mRef.child("Chats").child(currUid).orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
@@ -291,10 +282,10 @@ public class ChatListFragment extends Fragment {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 final User singleChatAdd = dataSnapshot.getValue(User.class);
-                Log.d("ChatList"," "+dataSnapshot.getValue().toString());
+                Log.d("ChatList", " " + dataSnapshot.getValue().toString());
                 final String uid = dataSnapshot.getKey();
 
-                Log.d("MYLOGS","log"+uid);
+                Log.d("MYLOGS", "log" + uid);
 
                 singleChatAdd.setUid(uid);
 
@@ -302,7 +293,7 @@ public class ChatListFragment extends Fragment {
                     @Override
                     public void onChildAdded(DataSnapshot ds, String s) {
 
-                        if(ds.getKey().toString().equals(uid)) {
+                        if (ds.getKey().toString().equals(uid)) {
                             Log.d("MYLOGS", "log" + ds.toString());
                             Iterator iterator = hashMap2.entrySet().iterator();
                             final User tempUser = ds.getValue(User.class);
@@ -355,7 +346,7 @@ public class ChatListFragment extends Fragment {
             public void onChildChanged(final DataSnapshot dataSnapshot, String s) {
 
                 singleChatChange = dataSnapshot.getValue(User.class);
-                Log.d("ChatChange",s+" "+dataSnapshot.getValue().toString());
+                Log.d("ChatChange", s + " " + dataSnapshot.getValue().toString());
                 String uid = dataSnapshot.getKey();
                 singleChatChange.setUid(uid);
 
@@ -363,11 +354,11 @@ public class ChatListFragment extends Fragment {
                 while (i.hasNext()) {
 
                     User sc = (User) i.next();
-                    Log.d("firstParam",sc.getUid());
-                    Log.d("secondParam",uid);
-                    if(sc.getUid().equals(uid)) {
+                    Log.d("firstParam", sc.getUid());
+                    Log.d("secondParam", uid);
+                    if (sc.getUid().equals(uid)) {
 
-                        if(sc.getTimestamp() == singleChatChange.getTimestamp()) {
+                        if (sc.getTimestamp() == singleChatChange.getTimestamp()) {
 
                             singleChatChange.setName(sc.getName());
                             singleChatChange.setPhoneNum(sc.getPhoneNum());
@@ -389,13 +380,12 @@ public class ChatListFragment extends Fragment {
 //
 //                                }
 //                            });
-                            chatList.remove(i.nextIndex()-1);
-                            chatList.add(i.nextIndex()-1,singleChatChange);
+                            chatList.remove(i.nextIndex() - 1);
+                            chatList.add(i.nextIndex() - 1, singleChatChange);
                             chatListAdapter.notifyDataSetChanged();
                             break;
 
-                        }
-                        else {
+                        } else {
 
                             singleChatChange.setName(sc.getName());
                             singleChatChange.setPhoneNum(sc.getPhoneNum());
@@ -419,8 +409,8 @@ public class ChatListFragment extends Fragment {
 //
 //                                }
 //                            });
-                            chatList.remove(i.nextIndex()-1);
-                            chatList.add(0,singleChatChange);
+                            chatList.remove(i.nextIndex() - 1);
+                            chatList.add(0, singleChatChange);
                             chatListAdapter.notifyDataSetChanged();
                             break;
 
@@ -464,7 +454,7 @@ public class ChatListFragment extends Fragment {
         // Here I am copying the sorted list in HashMap
         // using LinkedHashMap to preserve the insertion order
         HashMap sortedHashMap = new LinkedHashMap();
-        for (Iterator it = list.iterator(); it.hasNext();) {
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             sortedHashMap.put(entry.getKey(), entry.getValue());
         }

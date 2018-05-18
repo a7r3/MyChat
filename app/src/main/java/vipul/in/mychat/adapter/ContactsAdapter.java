@@ -17,21 +17,18 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.PicassoProvider;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
-import vipul.in.mychat.activity.MainActivity;
 import vipul.in.mychat.model.User;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> {
 
-    private Context mCtx,mContext;
+    private Context mCtx, mContext;
     private List<User> contactsList;
     private DatabaseReference dbRef;
     private FirebaseUser cUser;
@@ -44,7 +41,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     @Override
     public ContactsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(mCtx);
-        View view = layoutInflater.inflate(R.layout.user,null);
+        View view = layoutInflater.inflate(R.layout.user, null);
         view.setClickable(true);
         mContext = parent.getContext();
         return new ContactsViewHolder(view);
@@ -59,16 +56,15 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
         cUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if("true".equals(contacts.getIsOnline())) {
+        if ("true".equals(contacts.getIsOnline())) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
         } else {
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
-        if("default".equals(contacts.getThumb_pic())) {
+        if ("default".equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
-        }
-        else {
+        } else {
             Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
         }
 
@@ -76,11 +72,11 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, ChatActivity.class);
-                intent.putExtra("clicked",holder.name_from.getText().toString());
-                intent.putExtra("uid",contacts.getUid());
-                intent.putExtra("friendThumb",contacts.getThumb_pic());
-                intent.putExtra("friendProfilePic",contacts.getProfile_pic());
-                Log.d("Key","Key: "+contacts.getUid());
+                intent.putExtra("clicked", holder.name_from.getText().toString());
+                intent.putExtra("uid", contacts.getUid());
+                intent.putExtra("friendThumb", contacts.getThumb_pic());
+                intent.putExtra("friendProfilePic", contacts.getProfile_pic());
+                Log.d("Key", "Key: " + contacts.getUid());
                 mContext.startActivity(intent);
             }
         });
@@ -96,11 +92,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
                 ImageView imageView = myView.findViewById(R.id.imageViewDialog);
 
-                if("default".equals(contacts.getThumb_pic())) {
+                if ("default".equals(contacts.getThumb_pic())) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
 
-                }
-                else {
+                } else {
                     Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(imageView);
                 }
 
@@ -113,7 +108,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     }
 
 
-
     @Override
     public int getItemCount() {
         return contactsList.size();
@@ -122,7 +116,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     public class ContactsViewHolder extends RecyclerView.ViewHolder {
 
         RelativeLayout relativeLayout;
-        TextView name_from,last_message;
+        TextView name_from, last_message;
         ImageView onlineIndicator;
         CircleImageView thumbnail;
 

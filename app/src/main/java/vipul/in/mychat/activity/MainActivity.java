@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     //Button mBtn;
     //TextView mTextView;
     DatabaseReference mRef;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
     private FirebaseAuth mAuth;
     private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
     private FirebaseUser currentUser;
@@ -41,16 +43,11 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
-
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
-
 
 
         viewPager = findViewById(R.id.viewPager);
@@ -92,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         myProfile = new MyProfile();
         adapter.addFragment(chatListFragment, "CHATS");
         adapter.addFragment(contacts, "CONTACTS");
-        adapter.addFragment(myProfile,"PROFILE");
+        adapter.addFragment(myProfile, "PROFILE");
         viewPager.setAdapter(adapter);
 
     }
@@ -117,11 +114,11 @@ public class MainActivity extends AppCompatActivity {
             editor = sharedPreferences.edit();
 
 
-            editor.putString("initialized","YES");
+            editor.putString("initialized", "YES");
             mRef.child(mAuth.getCurrentUser().getUid()).child("profile_pic").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    editor.putString("profile_pic",dataSnapshot.getValue(String.class));
+                    editor.putString("profile_pic", dataSnapshot.getValue(String.class));
                     editor.apply();
                 }
 
@@ -133,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             mRef.child(mAuth.getCurrentUser().getUid()).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    editor.putString("thumb_pic",dataSnapshot.getValue(String.class));
+                    editor.putString("thumb_pic", dataSnapshot.getValue(String.class));
                     editor.apply();
                 }
 

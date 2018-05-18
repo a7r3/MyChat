@@ -46,8 +46,6 @@ import vipul.in.mychat.model.Message;
 
 public class ChatActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
-    private String receiverUid;
-    private boolean typingStarted;
     private final String TAG = getClass().getSimpleName();
     private final List<Message> msgList = new ArrayList<>();
     String getExtra;
@@ -59,19 +57,15 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     ImageButton imageButton, emojiButton;
     EmojiconEditText editText;
     View rootView;
-
     SharedPreferences sharedPreferences;
-
-
     InterstitialAd mInterstitialAd;
     RewardedVideoAd mRewardedVideoAd;
-
     RecyclerView chatRecyclerView;
     Toolbar chat_toolbar;
     String senderUid;
-
-    String myThumb,friendThumb;
-
+    String myThumb, friendThumb;
+    private String receiverUid;
+    private boolean typingStarted;
     private DatabaseReference mRef, rootDatabaseReference;
 
     @Override
@@ -119,20 +113,19 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         initializeAd();
 
-        sharedPreferences = getSharedPreferences("userInfo",MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("userInfo", MODE_PRIVATE);
 
-        myThumb = sharedPreferences.getString("thumb_pic","default");
+        myThumb = sharedPreferences.getString("thumb_pic", "default");
         friendThumb = getIntent().getStringExtra("friendThumb");
 
-        Log.d("THUMBS",myThumb+" "+friendThumb);
+        Log.d("THUMBS", myThumb + " " + friendThumb);
 
 
         receiverUid = getIntent().getStringExtra("uid");
         senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
-
-        messageAdapter = new MessageAdapter(msgList, this , myThumb , friendThumb);
+        messageAdapter = new MessageAdapter(msgList, this, myThumb, friendThumb);
         chatRecyclerView = findViewById(R.id.messageList);
 
         linearLayoutManager = new LinearLayoutManager(this);
@@ -159,10 +152,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         });
 
 
-
-
         editText.addTextChangedListener(new TextWatcher() {
-
 
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -251,14 +241,13 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()) {
-                    if( dataSnapshot.getValue(Boolean.class) ) {
+                if (dataSnapshot.exists()) {
+                    if (dataSnapshot.getValue(Boolean.class)) {
                         receiverLastSeen.setText("Typing...");
 
                         friendTyping = true;
 
-                    }
-                    else {
+                    } else {
                         friendTyping = false;
                         watchLastSeen();
                     }
@@ -381,7 +370,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     /**
      * Sends a message to the Recipient
      * Adds a node containing the message's details
-     *  under both the Sender and Receiver's nodes
+     * under both the Sender and Receiver's nodes
      * Message Details : Content, Seen (Indicator), Type (Text/Media), Time at which message was sent
      */
     private void sendMessage() {
@@ -452,7 +441,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     public void watchLastSeen() {
 
-        if(!friendTyping) {
+        if (!friendTyping) {
             mRef = FirebaseDatabase.getInstance().getReference().child("Users").child(receiverUid);
             mRef.child("isOnline").addValueEventListener(new ValueEventListener() {
                 @Override

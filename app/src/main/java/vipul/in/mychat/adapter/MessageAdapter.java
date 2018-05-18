@@ -3,11 +3,9 @@ package vipul.in.mychat.adapter;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -26,15 +24,14 @@ import vipul.in.mychat.model.Message;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
-    private Context context;
-    private List<Message> messageList;
     private final int OUTGOING_MESSAGE_VIEW = 0;
     private final int INCOMING_MESSAGE_VIEW = 1;
     private final int DATE_VIEW = 2;
+    private Context context;
+    private List<Message> messageList;
+    private String myThumb, friendThumb;
 
-    private String myThumb,friendThumb;
-
-    public MessageAdapter(List<Message> mMessageList, Context context , String myThumb , String friendThumb) {
+    public MessageAdapter(List<Message> mMessageList, Context context, String myThumb, String friendThumb) {
 
         this.messageList = mMessageList;
         this.context = context;
@@ -46,9 +43,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layoutResId = R.layout.incoming_message_layout;
-        if(viewType == OUTGOING_MESSAGE_VIEW)
+        if (viewType == OUTGOING_MESSAGE_VIEW)
             layoutResId = R.layout.outgoing_message_layout;
-        else if(viewType == DATE_VIEW)
+        else if (viewType == DATE_VIEW)
             layoutResId = R.layout.date_layout;
         View view = LayoutInflater.from(context).inflate(layoutResId, parent, false);
         return new MessageViewHolder(view);
@@ -59,7 +56,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // TODO: Show Date between messages
         // DATE_VIEW
 
-        if(messageList.get(position).getFrom().equals("Me"))
+        if (messageList.get(position).getFrom().equals("Me"))
             return OUTGOING_MESSAGE_VIEW;
         else
             return INCOMING_MESSAGE_VIEW;
@@ -81,25 +78,22 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.displayName.setText(from_user);
 
-        if(from_user.equals("Me")) {
-            if("default".equals(myThumb)) {
+        if (from_user.equals("Me")) {
+            if ("default".equals(myThumb)) {
 
                 holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
 
-            }
-            else {
+            } else {
 
                 Picasso.get().load(Uri.parse(myThumb)).into(holder.profileImage);
 
             }
-        }
-        else {
-            if("default".equals(friendThumb)) {
+        } else {
+            if ("default".equals(friendThumb)) {
 
                 holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
 
-            }
-            else {
+            } else {
 
                 Picasso.get().load(Uri.parse(friendThumb)).into(holder.profileImage);
 

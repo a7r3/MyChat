@@ -10,12 +10,12 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/settings_image"
         android:layout_width="170dp"
-        app:civ_circle_background_color="#E2E8EA"
         android:layout_height="170dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:src="@drawable/ic_person_black_24dp" />
+        android:src="@drawable/ic_person_black_24dp"
+        app:civ_circle_background_color="#E2E8EA" />
 
     <TextView
         android:id="@+id/settings_name"

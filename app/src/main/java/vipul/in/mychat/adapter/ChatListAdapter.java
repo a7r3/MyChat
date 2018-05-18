@@ -45,7 +45,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
     public ChatListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        View view = layoutInflater.inflate(R.layout.user,null);
+        View view = layoutInflater.inflate(R.layout.user, null);
 
         return new ChatListViewHolder(view);
     }
@@ -57,18 +57,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.name_from.setText(singleChat.getName());
         holder.last_message.setText(singleChat.getLastMessage());
 
-        if("default".equals(singleChat.getThumb_pic())) {
+        if ("default".equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         }
 //        else if(singleChat.getThumb_pic().equals(null)) {
 //            holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
 //        }
         else {
-            Log.d("DEBUG",singleChat.getName());
+            Log.d("DEBUG", singleChat.getName());
             Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
         }
 
-        if("true".equals(singleChat.getIsOnline())) {
+        if ("true".equals(singleChat.getIsOnline())) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
         } else {
             holder.onlineIndicator.setImageResource(R.drawable.offline);
@@ -85,10 +85,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 
                 ImageView imageView = myView.findViewById(R.id.imageViewDialog);
 
-                if("default".equals(singleChat.getThumb_pic())) {
+                if ("default".equals(singleChat.getThumb_pic())) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
-                }
-                else {
+                } else {
                     Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(imageView);
                 }
 
@@ -103,10 +102,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             public void onClick(View view) {
 
                 Intent intent = new Intent(mContext, ChatActivity.class);
-                intent.putExtra("clicked",singleChat.getName());
-                intent.putExtra("uid",singleChat.getUid());
-                intent.putExtra("friendThumb",singleChat.getThumb_pic());
-                intent.putExtra("friendProfilePic",singleChat.getProfile_pic());
+                intent.putExtra("clicked", singleChat.getName());
+                intent.putExtra("uid", singleChat.getUid());
+                intent.putExtra("friendThumb", singleChat.getThumb_pic());
+                intent.putExtra("friendProfilePic", singleChat.getProfile_pic());
                 mContext.startActivity(intent);
 
             }
@@ -118,12 +117,13 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         return singleChats.size();
     }
 
-    public class ChatListViewHolder extends RecyclerView.ViewHolder{
+    public class ChatListViewHolder extends RecyclerView.ViewHolder {
 
         RelativeLayout relativeLayout;
-        TextView name_from,last_message;
+        TextView name_from, last_message;
         ImageView onlineIndicator;
         CircleImageView thumbnail;
+
         public ChatListViewHolder(View itemView) {
 
             super(itemView);

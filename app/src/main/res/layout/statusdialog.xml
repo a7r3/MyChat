@@ -1,20 +1,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
+
     <EditText
         android:id="@+id/enterStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter new Status"
-        />
+        android:hint="Enter new Status" />
+
     <Button
+        android:id="@+id/submitStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Submit"
-        android:id="@+id/submitStatus"
+        android:layout_alignParentEnd="true"
         android:layout_below="@id/enterStatus"
         android:layout_marginTop="10dp"
-        android:layout_alignParentEnd="true"/>
+        android:text="Submit" />
 </RelativeLayout>

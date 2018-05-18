@@ -19,15 +19,15 @@
         android:layout_above="@id/sendMsgLine"
         android:layout_below="@id/chat_toolbar"
         android:layout_marginBottom="4dp"
-        android:fillViewport="true"
         android:clipChildren="false"
+        android:fillViewport="true"
         android:isScrollContainer="true">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/messageList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clipChildren="false"/>
+            android:clipChildren="false" />
 
     </ScrollView>
 

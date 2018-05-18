@@ -11,42 +11,42 @@
 
     <RelativeLayout
         android:id="@+id/onboard_toolbar"
-        android:background="@color/colorPrimary"
-        android:padding="8dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:padding="8dp">
 
         <ImageView
-            android:layout_marginStart="4dp"
             android:id="@+id/chatProfilePicture"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_person_black_24dp"
-            android:background="@drawable/round" />
+            android:layout_marginStart="4dp"
+            android:background="@drawable/round"
+            android:src="@drawable/ic_person_black_24dp" />
 
         <TextView
-            android:layout_marginStart="8dp"
-            android:layout_toEndOf="@id/chatProfilePicture"
             android:id="@+id/chatPersonName"
-            android:textSize="17sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_toEndOf="@id/chatProfilePicture"
             android:includeFontPadding="false"
             android:text="MyChat"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:textSize="17sp" />
 
         <!-- TODO: Maybe we can use this as an Network Connectivity Indicator -->
         <TextView
-            android:layout_marginStart="8dp"
-            android:layout_toEndOf="@id/chatProfilePicture"
             android:id="@+id/chatLastSeen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/chatPersonName"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="2dp"
+            android:layout_toEndOf="@id/chatProfilePicture"
             android:text="We're connected!"
-            android:textSize="12sp"
-            android:textColor="#B9B9B9"/>
+            android:textColor="#B9B9B9"
+            android:textSize="12sp" />
 
     </RelativeLayout>
 
@@ -56,15 +56,15 @@
         android:layout_above="@id/onboard_message_send_entry"
         android:layout_below="@id/onboard_toolbar"
         android:layout_marginBottom="4dp"
-        android:fillViewport="true"
         android:clipChildren="false"
+        android:fillViewport="true"
         android:isScrollContainer="true">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/onboard_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clipChildren="false"/>
+            android:clipChildren="false" />
 
     </ScrollView>
 
@@ -102,15 +102,15 @@
                 android:id="@+id/country_code_picker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:ccp_textSize="14sp"
                 android:padding="3dp"
                 android:visibility="gone"
-                app:ccp_autoDetectCountry="true"
-                app:ccpDialog_showPhoneCode="true"
                 app:ccpDialog_allowSearch="true"
                 app:ccpDialog_keyboardAutoPopup="true"
                 app:ccpDialog_showNameCode="true"
-                app:ccp_autoFormatNumber="true" />
+                app:ccpDialog_showPhoneCode="true"
+                app:ccp_autoDetectCountry="true"
+                app:ccp_autoFormatNumber="true"
+                app:ccp_textSize="14sp" />
 
             <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
                 android:id="@+id/editTextEmoji"
@@ -118,8 +118,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="12"
                 android:background="@android:color/transparent"
-                android:padding="8dp"
                 android:hint="Write a message"
+                android:padding="8dp"
                 android:textSize="18sp"
                 emojicon:emojiconSize="28sp" />
 

@@ -25,10 +25,10 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/message_profile_layout"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="8dp"
             android:layout_below="@+id/name_text_layout"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@id/message_profile_layout"
             android:orientation="horizontal">
 
             <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
@@ -43,8 +43,8 @@
                 android:id="@+id/time_text_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="8dp"
                 android:paddingEnd="8dp"
+                android:paddingStart="8dp"
                 android:text="00:00"
                 android:textSize="12sp" />
 

@@ -41,12 +41,12 @@ import java.util.Map;
 
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ContactsAdapter;
-import vipul.in.mychat.adapter.UserAdapter;
 import vipul.in.mychat.model.User;
 
 
 public class ContactsFragment extends Fragment {
 
+    DatabaseReference mRef;
     private ContactsAdapter adapter;
     private List<User> userList;
     private Activity activity;
@@ -54,8 +54,6 @@ public class ContactsFragment extends Fragment {
     private Context context;
     private String currUid;
     private RecyclerView contactsRecyclerView;
-
-    DatabaseReference mRef;
 
     private static HashMap sortByValues(HashMap map) {
         List list = new LinkedList(map.entrySet());
@@ -70,7 +68,7 @@ public class ContactsFragment extends Fragment {
         // Here I am copying the sorted list in HashMap
         // using LinkedHashMap to preserve the insertion order
         HashMap sortedHashMap = new LinkedHashMap();
-        for (Iterator it = list.iterator(); it.hasNext();) {
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             sortedHashMap.put(entry.getKey(), entry.getValue());
         }
@@ -121,18 +119,17 @@ public class ContactsFragment extends Fragment {
                     ListIterator<User> it = userList.listIterator();
                     int tempFlag = 0;
                     while (it.hasNext()) {
-                        if(it.next().getPhoneNum().equals(contacts.getPhoneNum()))
-                        {
+                        if (it.next().getPhoneNum().equals(contacts.getPhoneNum())) {
                             int index = it.nextIndex();
-                            String tempName = userList.get(index-1).getName();
-                            userList.remove(index-1);
+                            String tempName = userList.get(index - 1).getName();
+                            userList.remove(index - 1);
                             contacts.setName(tempName);
                             contacts.setUid(dataSnapshot.getKey());
-                            userList.add(index-1,contacts);
-                            Log.d("Changed","Changed "+index);
+                            userList.add(index - 1, contacts);
+                            Log.d("Changed", "Changed " + index);
                             tempFlag = 1;
                         }
-                        if(tempFlag == 1) {
+                        if (tempFlag == 1) {
                             adapter.notifyDataSetChanged();
                             break;
                         }
@@ -242,7 +239,7 @@ public class ContactsFragment extends Fragment {
         userList = new ArrayList<>();
         context = container.getContext();
 
-        adapter = new ContactsAdapter(rootView.getContext(),userList);
+        adapter = new ContactsAdapter(rootView.getContext(), userList);
 
 
         contactsRecyclerView = rootView.findViewById(R.id.contacts_recyclerView);

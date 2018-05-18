@@ -4,20 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -31,11 +23,11 @@ import vipul.in.mychat.model.User;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
+    public static final int MODE_SHOW_CHATS = 220;
+    public static final int MODE_SHOW_CONTACTS = 420;
     private Context context;
     private List<User> users;
     private int mode;
-    public static final int MODE_SHOW_CHATS = 220;
-    public static final int MODE_SHOW_CONTACTS = 420;
 
     public UserAdapter(Context context, List<User> users, int mode) {
         this.users = users;
@@ -58,7 +50,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
         holder.userNameText.setText(user.getName());
 
-        switch(mode) {
+        switch (mode) {
             case MODE_SHOW_CHATS:
                 holder.lastMessageOrNumberText.setText(user.getLastMessage());
             case MODE_SHOW_CONTACTS:
@@ -66,7 +58,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             default:
         }
 
-        if(user.getIsOnline().equals("true")) {
+        if (user.getIsOnline().equals("true")) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
         } else {
             holder.onlineIndicator.setImageResource(R.drawable.offline);
