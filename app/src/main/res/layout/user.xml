@@ -13,7 +13,6 @@
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
         android:background="@drawable/round"
-        android:padding="4dp"
         android:src="@drawable/ic_person_black_24dp" />
 
     <ImageView

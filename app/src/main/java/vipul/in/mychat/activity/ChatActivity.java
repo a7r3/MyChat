@@ -1,8 +1,13 @@
 package vipul.in.mychat.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,8 +17,11 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +33,7 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,17 +41,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 import vipul.in.mychat.R;
 import vipul.in.mychat.Utils;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
+import vipul.in.mychat.model.User;
 
 public class ChatActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
@@ -64,9 +76,17 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     Toolbar chat_toolbar;
     String senderUid;
     String myThumb, friendThumb;
+    private CircleImageView chatProfileImage;
     private String receiverUid;
     private boolean typingStarted;
     private DatabaseReference mRef, rootDatabaseReference;
+    private View profileBottomSheetView;
+    private CircleImageView profileBottomSheetImage;
+    private TextView profileBottomSheetName;
+    private TextView profileBottomSheetStatus;
+    private FloatingActionButton imageSelectorButton;
+    private ImageView statusEditorButton;
+    private BottomSheetDialog profileBottomSheetDialog;
 
     @Override
     protected void onStart() {
@@ -203,7 +223,37 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowCustomEnabled(true);
 
-        actionBar.setCustomView(R.layout.chat_app_bar);
+        View chatCustomToolbar = LayoutInflater.from(this).inflate(R.layout.chat_app_bar, null);
+        chatProfileImage = chatCustomToolbar.findViewById(R.id.chatProfilePicture);
+
+        FirebaseDatabase.getInstance().getReference().child("Users").child(receiverUid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String name = dataSnapshot.child("name").getValue().toString();
+                String image = dataSnapshot.child("profile_pic").getValue().toString();
+                String status = dataSnapshot.child("status").getValue().toString();
+
+                profileBottomSheetName.setText(name);
+                profileBottomSheetStatus.setText(status);
+
+                sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+                if (!image.equals("default")) {
+                    Uri imageUri = Uri.parse(image);
+                    Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
+                    Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(chatProfileImage);
+                } else {
+                    profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        actionBar.setCustomView(chatCustomToolbar);
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -274,6 +324,35 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
         loadMessages();
+
+        profileBottomSheetView = LayoutInflater.from(this).inflate(R.layout.profile_bottom_sheet, null);
+
+        profileBottomSheetImage = profileBottomSheetView.findViewById(R.id.profile_bottom_sheet_image);
+        profileBottomSheetName = profileBottomSheetView.findViewById(R.id.profile_bottom_sheet_name);
+        profileBottomSheetStatus = profileBottomSheetView.findViewById(R.id.profile_bottom_sheet_status);
+        imageSelectorButton = profileBottomSheetView.findViewById(R.id.profile_bottom_sheet_image_select_button);
+        imageSelectorButton.setVisibility(View.GONE);
+
+        profileBottomSheetImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(ChatActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        profileBottomSheetDialog = new BottomSheetDialog(this);
+        profileBottomSheetDialog.setCanceledOnTouchOutside(true);
+        profileBottomSheetDialog.setCancelable(true);
+        profileBottomSheetDialog.setContentView(profileBottomSheetView);
+        profileBottomSheetDialog.getWindow().findViewById(R.id.design_bottom_sheet).setBackgroundColor(Color.TRANSPARENT);
+
+        chat_toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                profileBottomSheetDialog.show();
+            }
+        });
+
 
     }
 
