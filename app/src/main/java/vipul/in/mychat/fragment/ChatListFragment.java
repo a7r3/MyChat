@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import vipul.in.mychat.MarginDividerItemDecoration;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ChatListAdapter;
 import vipul.in.mychat.model.User;
@@ -70,9 +70,8 @@ public class ChatListFragment extends Fragment {
         chatList = new ArrayList<>();
         chatListAdapter = new ChatListAdapter(rootView.getContext(), chatList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(rootView.getContext());
-//        linearLayoutManager.setReverseLayout(true);
-//        linearLayoutManager.setStackFromEnd(true);
-        chatListRecycler.addItemDecoration(new DividerItemDecoration(context, DividerItemDecoration.VERTICAL));
+        MarginDividerItemDecoration itemDecoration = new MarginDividerItemDecoration(getContext());
+        chatListRecycler.addItemDecoration(itemDecoration);
         chatListRecycler.setLayoutManager(linearLayoutManager);
         chatListRecycler.setAdapter(chatListAdapter);
 
@@ -254,7 +253,6 @@ public class ChatListFragment extends Fragment {
     */
 
     private void fetch_chats() {
-
 
         Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         HashMap<String, String> hm = new HashMap<String, String>();

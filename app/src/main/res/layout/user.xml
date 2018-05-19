@@ -4,34 +4,40 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:selectableItemBackground"
-    android:paddingBottom="8dp"
-    android:paddingTop="8dp">
+    android:paddingBottom="12dp"
+    android:paddingTop="12dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/user_single_image"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+    <RelativeLayout
         android:layout_marginStart="16dp"
-        android:background="@drawable/round"
-        android:src="@drawable/ic_person_black_24dp" />
+        android:id="@+id/user_single_image_layout"
+        android:layout_width="48dp"
+        android:layout_height="48dp">
 
-    <ImageView
-        android:id="@+id/online_indicator"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="4dp"
-        android:contentDescription="Offline"
-        android:src="@drawable/offline" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/user_single_image"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/round"
+            android:src="@drawable/ic_person_black_24dp" />
+
+        <ImageView
+            android:id="@+id/online_indicator"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:contentDescription="Offline"
+            android:src="@drawable/offline" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/user_single_image"
+        android:layout_alignTop="@+id/user_single_image_layout"
         android:layout_marginStart="16dp"
-        android:layout_toEndOf="@+id/user_single_image"
+        android:layout_toEndOf="@+id/user_single_image_layout"
         android:text="Display Name"
         android:textColor="@android:color/black"
         android:textSize="16sp"
