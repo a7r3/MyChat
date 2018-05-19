@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
@@ -199,6 +201,7 @@ public class OnboardActivity extends AppCompatActivity {
         sendMessageAsBot("Let's get started");
 
         onboardUser();
+
 
         // The Send button over here acts differently according to the current Onboard Stage
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
