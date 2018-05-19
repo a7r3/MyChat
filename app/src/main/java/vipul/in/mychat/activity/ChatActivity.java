@@ -1,5 +1,6 @@
 package vipul.in.mychat.activity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -340,7 +342,24 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         profileBottomSheetImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ChatActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
+                Dialog imgDialog = new Dialog(ChatActivity.this);
+                imgDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+                View myView = LayoutInflater.from(ChatActivity.this).inflate(R.layout.myimagedialog
+                        , null);
+                imgDialog.setContentView(myView);
+
+                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
+
+
+                if (!getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("default") || !getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("null")) {
+                    imageView.setImageURI(Uri.parse(getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"default")));
+
+                } else {
+                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
+                }
+
+                imgDialog.show();
+                //Toast.makeText(ChatActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
             }
         });
 

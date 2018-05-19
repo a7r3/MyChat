@@ -21,6 +21,7 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
+import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.model.User;
 
@@ -57,13 +58,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.name_from.setText(singleChat.getName());
         holder.last_message.setText(singleChat.getLastMessage());
 
+
+        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+
         if ("default".equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
-        }
-        else {
-            Log.d("DEBUG", singleChat.getName());
+        } else {
             Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
         }
+
 
         if ("true".equals(singleChat.getIsOnline())) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
@@ -82,14 +85,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 
                 ImageView imageView = myView.findViewById(R.id.imageViewDialog);
 
-                if ("default".equals(singleChat.getThumb_pic())) {
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                String profile_picture = sharedPreferenceManager.getData(singleChat.getUid());
+
+                if ("default".equals(profile_picture)) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
+
                 } else {
-                    Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(imageView);
+                    imageView.setImageURI(Uri.parse(profile_picture));
                 }
-
-                //imageView.setImageResource(R.drawable.ic_person_black_24dp);
-
                 settingsDialog.show();
             }
         });
@@ -101,8 +105,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
                 Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("clicked", singleChat.getName());
                 intent.putExtra("uid", singleChat.getUid());
-                intent.putExtra("friendThumb", singleChat.getThumb_pic());
-                intent.putExtra("friendProfilePic", singleChat.getProfile_pic());
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal",mContext);
+                intent.putExtra("friendThumb", sharedPreferenceManager.getData(singleChat.getUid()));
+                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(singleChat.getUid()));
                 mContext.startActivity(intent);
 
             }

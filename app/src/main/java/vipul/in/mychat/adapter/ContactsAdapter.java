@@ -23,6 +23,7 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
+import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.model.User;
 
@@ -62,11 +63,14 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
+        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+
         if ("default".equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
             Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
         }
+
 
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,8 +78,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
                 Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("clicked", holder.name_from.getText().toString());
                 intent.putExtra("uid", contacts.getUid());
-                intent.putExtra("friendThumb", contacts.getThumb_pic());
-                intent.putExtra("friendProfilePic", contacts.getProfile_pic());
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal",mContext);
+                intent.putExtra("friendThumb", sharedPreferenceManager.getData(contacts.getUid()));
+                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(contacts.getUid()));
                 Log.d("Key", "Key: " + contacts.getUid());
                 mContext.startActivity(intent);
             }
@@ -92,11 +98,14 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
                 ImageView imageView = myView.findViewById(R.id.imageViewDialog);
 
-                if ("default".equals(contacts.getThumb_pic())) {
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                String profile_picture = sharedPreferenceManager.getData(contacts.getUid());
+
+                if ("default".equals(profile_picture)) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
 
                 } else {
-                    Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(imageView);
+                    imageView.setImageURI(Uri.parse(profile_picture));
                 }
 
                 //imageView.setImageResource(R.drawable.ic_person_black_24dp);

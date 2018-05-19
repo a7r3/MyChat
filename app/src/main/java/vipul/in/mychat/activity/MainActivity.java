@@ -1,6 +1,7 @@
 package vipul.in.mychat.activity;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,6 +54,7 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
 import vipul.in.mychat.R;
+import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.adapter.ViewPagerAdapter;
 import vipul.in.mychat.fragment.ChatListFragment;
 import vipul.in.mychat.fragment.ContactsFragment;
@@ -120,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
         profileBottomSheetStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -152,13 +157,29 @@ public class MainActivity extends AppCompatActivity {
         profileBottomSheetImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
+
+                Dialog imgDialog = new Dialog(MainActivity.this);
+                imgDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+                View myView = LayoutInflater.from(MainActivity.this).inflate(R.layout.myimagedialog
+                        , null);
+                imgDialog.setContentView(myView);
+
+                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
+
+                if ("default".equals(sharedPreferences.getString("profile_pic","default"))) {
+                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
+
+                } else {
+                    Picasso.get().load(sharedPreferences.getString("profile_pic","default")).into(imageView);
+                }
+                imgDialog.show();
+                //Toast.makeText(MainActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
             }
         });
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        String curr_uid = user.getUid();
+        final String curr_uid = user.getUid();
 
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(curr_uid);
 

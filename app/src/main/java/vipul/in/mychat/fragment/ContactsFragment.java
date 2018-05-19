@@ -137,11 +137,13 @@ public class ContactsFragment extends Fragment {
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     User contact = dataSnapshot.getValue(User.class);
                     String k = dataSnapshot.child("phoneNum").getValue(String.class);
+
+
+
                     if (k.equals(record.getKey().toString())) {
                         contact.setName(record.getValue().toString());
                         contact.setUid(dataSnapshot.getKey());
                         userList.add(contact);
-
 
                         if(sharedPreferencesThumbLive.getString(contact.getUid(),"null").equals("null")) {
                             editorThumbLive.putString(contact.getUid(),contact.getThumb_pic());
@@ -199,10 +201,6 @@ public class ContactsFragment extends Fragment {
                             }
 
                         }
-
-
-
-
 
                         if(sharedPreferencesPicLive.getString(contact.getUid(),"null").equals("null")) {
                             editorPicLive.putString(contact.getUid(),contact.getProfile_pic());

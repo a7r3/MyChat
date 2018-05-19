@@ -95,7 +95,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             } else {
 
-                Picasso.get().load(Uri.parse(friendThumb)).into(holder.profileImage);
+                holder.profileImage.setImageURI(Uri.parse(friendThumb));
 
             }
         }
