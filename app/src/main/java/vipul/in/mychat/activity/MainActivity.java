@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
@@ -384,6 +385,15 @@ public class MainActivity extends AppCompatActivity {
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (currentUser != null) {
+            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("false");
+            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
         }
     }
 }

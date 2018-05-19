@@ -581,6 +581,14 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("isOnline").setValue("false");
+        FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("lastSeen").setValue(ServerValue.TIMESTAMP);
+    }
+
+    @Override
     public void onRewarded(RewardItem reward) {
         // Reward the user.
         Toast.makeText(this, "onRewarded! currency: " + reward.getType() + "  amount: " +
