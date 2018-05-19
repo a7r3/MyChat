@@ -236,11 +236,15 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 profileBottomSheetName.setText(name);
                 profileBottomSheetStatus.setText(status);
 
+
+
                 sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-                if (!image.equals("default")) {
-                    Uri imageUri = Uri.parse(image);
-                    Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
-                    Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(chatProfileImage);
+                if (!getSharedPreferences("thumbInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("default") || !getSharedPreferences("thumbInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("null")) {
+                    //Uri imageUri = Uri.parse(image);
+                    //Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
+                    profileBottomSheetImage.setImageURI(Uri.parse(getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"default")));
+                    chatProfileImage.setImageURI(Uri.parse(getSharedPreferences("thumbInfoLocal",MODE_PRIVATE).getString(receiverUid,"default")));
+                    //Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(chatProfileImage);
                 } else {
                     profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
                 }
