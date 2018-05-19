@@ -88,6 +88,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
 
         viewPager = findViewById(R.id.viewPager);
@@ -168,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
                 profileBottomSheetName.setText(name);
                 profileBottomSheetStatus.setText(status);
 
-                sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                 if (!image.equals("default")) {
                     Uri imageUri = Uri.parse(sharedPreferences.getString("profile_pic", "default"));
                     Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
@@ -346,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
                             uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> thumb_task) {
-                                    String thumb_downloadUrl = thumb_task.getResult().getDownloadUrl().toString();
+                                    final String thumb_downloadUrl = thumb_task.getResult().getDownloadUrl().toString();
                                     if (thumb_task.isSuccessful()) {
                                         Map update_hashMap = new HashMap();
                                         update_hashMap.put("profile_pic", download_url);
@@ -356,6 +359,10 @@ public class MainActivity extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     mProgressDialog.dismiss();
+
+                                                    editor.putString("profile_pic", download_url);
+                                                    editor.putString("thumb_pic",thumb_downloadUrl);
+
                                                     Picasso.get().load(Uri.parse(download_url)).into(profileBottomSheetImage);
                                                     //Toast.makeText(getParentFragment().getContext(), "Success Uploading.", Toast.LENGTH_LONG).show();
                                                 }
