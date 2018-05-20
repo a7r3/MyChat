@@ -134,6 +134,5 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             displayName = v.findViewById(R.id.name_text_layout);
             messageTime = v.findViewById(R.id.time_text_layout);
         }
-
     }
 }

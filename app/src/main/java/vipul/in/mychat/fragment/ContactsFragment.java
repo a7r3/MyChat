@@ -34,6 +34,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -144,6 +145,20 @@ public class ContactsFragment extends Fragment {
                         contact.setName(record.getValue().toString());
                         contact.setUid(dataSnapshot.getKey());
                         userList.add(contact);
+                        final String frndUid = dataSnapshot.getKey();
+                        FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(frndUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot ds) {
+                                if(!ds.exists()) {
+                                    FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(frndUid).child("name").setValue(record.getValue().toString());
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
 
                         if(sharedPreferencesThumbLive.getString(contact.getUid(),"null").equals("null")) {
                             editorThumbLive.putString(contact.getUid(),contact.getThumb_pic());
@@ -197,7 +212,6 @@ public class ContactsFragment extends Fragment {
 
                                 editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
                                 editorThumb.apply();
-
                             }
 
                         }
@@ -269,7 +283,7 @@ public class ContactsFragment extends Fragment {
                             contacts.setName(tempName);
                             contacts.setUid(dataSnapshot.getKey());
                             userList.add(index - 1, contacts);
-                            Log.d("Changed", "Changed " + index);
+                            //Log.d("Changed", "Changed " + index);
                             tempFlag = 1;
                         }
                         if (tempFlag == 1) {

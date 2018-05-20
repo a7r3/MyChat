@@ -241,11 +241,11 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
 
                 sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-                if (!getSharedPreferences("thumbInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("default") || !getSharedPreferences("thumbInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("null")) {
+                if (!getIntent().getStringExtra("friendProfilePic").equals("default") || !getIntent().getStringExtra("friendProfilePic").equals("null")) {
                     //Uri imageUri = Uri.parse(image);
                     //Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
-                    profileBottomSheetImage.setImageURI(Uri.parse(getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"default")));
-                    chatProfileImage.setImageURI(Uri.parse(getSharedPreferences("thumbInfoLocal",MODE_PRIVATE).getString(receiverUid,"default")));
+                    profileBottomSheetImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendProfilePic")));
+                    chatProfileImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendThumb")));
                     //Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(chatProfileImage);
                 } else {
                     profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
