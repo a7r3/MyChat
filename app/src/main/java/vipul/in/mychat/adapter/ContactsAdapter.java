@@ -1,9 +1,11 @@
 package vipul.in.mychat.adapter;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,26 +27,25 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.activity.ChatActivity;
+import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> {
 
-    private Context mCtx, mContext;
+    private Context mContext;
     private List<User> contactsList;
     private DatabaseReference dbRef;
     private FirebaseUser cUser;
 
-    public ContactsAdapter(Context mCtx, List<User> contactsList) {
-        this.mCtx = mCtx;
+    public ContactsAdapter(Context mContext, List<User> contactsList) {
+        this.mContext = mContext;
         this.contactsList = contactsList;
     }
 
     @Override
     public ContactsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater = LayoutInflater.from(mCtx);
-        View view = layoutInflater.inflate(R.layout.user, null);
-        view.setClickable(true);
-        mContext = parent.getContext();
+        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+        View view = layoutInflater.inflate(R.layout.user, parent, false);
         return new ContactsViewHolder(view);
     }
 
@@ -90,27 +91,20 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         holder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog settingsDialog = new Dialog(mContext);
-                settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                View myView = LayoutInflater.from(mCtx).inflate(R.layout.myimagedialog
-                        , null);
-                settingsDialog.setContentView(myView);
-
-                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
-
+                Intent imageDialogIntent = new Intent(mContext, ImageDialogActivity.class);
                 SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
                 String profile_picture = sharedPreferenceManager.getData(contacts.getUid());
-
                 if ("default".equals(profile_picture)) {
-                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
-
+                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
                 } else {
-                    imageView.setImageURI(Uri.parse(profile_picture));
+                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, profile_picture);
                 }
+                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, contacts.getName());
+                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, contacts.getUid());
 
-                //imageView.setImageResource(R.drawable.ic_person_black_24dp);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) mContext, holder.thumbnail, "image_transition");
 
-                settingsDialog.show();
+                mContext.startActivity(imageDialogIntent, options.toBundle());
             }
         });
 

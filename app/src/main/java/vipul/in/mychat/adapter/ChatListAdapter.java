@@ -1,16 +1,15 @@
 package vipul.in.mychat.adapter;
 
 
-import android.app.Dialog;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,6 +22,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.activity.ChatActivity;
+import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
 
 /**
@@ -52,7 +52,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
     }
 
     @Override
-    public void onBindViewHolder(ChatListViewHolder holder, int position) {
+    public void onBindViewHolder(final ChatListViewHolder holder, int position) {
 
         final User singleChat = singleChats.get(position);
         holder.name_from.setText(singleChat.getName());
@@ -77,24 +77,20 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Dialog settingsDialog = new Dialog(mContext);
-                settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                View myView = LayoutInflater.from(mContext).inflate(R.layout.myimagedialog
-                        , null);
-                settingsDialog.setContentView(myView);
-
-                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
-
+                Intent imageDialogIntent = new Intent(mContext, ImageDialogActivity.class);
                 SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
                 String profile_picture = sharedPreferenceManager.getData(singleChat.getUid());
-
                 if ("default".equals(profile_picture)) {
-                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
-
+                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
                 } else {
-                    imageView.setImageURI(Uri.parse(profile_picture));
+                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, profile_picture);
                 }
-                settingsDialog.show();
+                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, singleChat.getName());
+                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, singleChat.getUid());
+
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) mContext, holder.thumbnail, "image_transition");
+
+                mContext.startActivity(imageDialogIntent, options.toBundle());
             }
         });
 

@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,7 +34,6 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,17 +41,22 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 import vipul.in.mychat.R;
 import vipul.in.mychat.Utils;
+import vipul.in.mychat.adapter.ChatListAdapter;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
 import vipul.in.mychat.model.User;
@@ -94,6 +97,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     protected void onStart() {
         Log.d(TAG, "Activity onStart");
         super.onStart();
+
         senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         receiverUid = getIntent().getStringExtra("uid");
 
@@ -168,7 +172,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             @Override
             public void onKeyboardClose() {
                 Log.e(TAG, "Keyboard Closed");
-//                chatRecyclerView.scrollToPosition(msgList.size() - 1);
             }
 
         });
@@ -237,8 +240,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
                 profileBottomSheetName.setText(name);
                 profileBottomSheetStatus.setText(status);
-
-
 
                 sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                 if (!getIntent().getStringExtra("friendProfilePic").equals("default") || !getIntent().getStringExtra("friendProfilePic").equals("null")) {
@@ -344,11 +345,11 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             public void onClick(View v) {
                 Dialog imgDialog = new Dialog(ChatActivity.this);
                 imgDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                View myView = LayoutInflater.from(ChatActivity.this).inflate(R.layout.myimagedialog
+                View myView = LayoutInflater.from(ChatActivity.this).inflate(R.layout.image_dialog_layout
                         , null);
                 imgDialog.setContentView(myView);
 
-                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
+                ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
 
                 if (!getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("default") || !getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("null")) {
@@ -440,8 +441,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 } else {
                     messages.setFrom(getExtra);
                 }
-                msgList.add(messages);
-                messageAdapter.notifyDataSetChanged();
+                messageAdapter.addMessage(messages);
                 chatRecyclerView.scrollToPosition(msgList.size() - 1);
             }
 
@@ -512,7 +512,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         messageUserMap.put(receiverMessageReference + "/" + pushId, messageMap);
 
         // Blank out the Input Bar, lets the user know that the sending process has been started
-        editText.setText("");
+        editText.getText().clear();
 
         // It's obvious that the Sender has seen the message which was created by him/herself
         rootDatabaseReference.child("Chats").child(senderUid).child(receiverUid).child("seen").setValue(true);
@@ -539,7 +539,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         });
 
     }
-
 
     public void watchLastSeen() {
 

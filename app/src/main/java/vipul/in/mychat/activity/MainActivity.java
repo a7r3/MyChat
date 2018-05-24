@@ -24,7 +24,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -54,7 +53,6 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
 import vipul.in.mychat.R;
-import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.adapter.ViewPagerAdapter;
 import vipul.in.mychat.fragment.ChatListFragment;
 import vipul.in.mychat.fragment.ContactsFragment;
@@ -160,11 +158,11 @@ public class MainActivity extends AppCompatActivity {
 
                 Dialog imgDialog = new Dialog(MainActivity.this);
                 imgDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                View myView = LayoutInflater.from(MainActivity.this).inflate(R.layout.myimagedialog
+                View myView = LayoutInflater.from(MainActivity.this).inflate(R.layout.image_dialog_layout
                         , null);
                 imgDialog.setContentView(myView);
 
-                ImageView imageView = myView.findViewById(R.id.imageViewDialog);
+                ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
                 if ("default".equals(sharedPreferences.getString("profile_pic","default"))) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
