@@ -42,21 +42,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
 
 public class OnboardActivity extends AppCompatActivity {
 
+    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
     private final int ASK_PHONE_NUMBER = 0;
     private final int ASK_OTP = 1;
     private final int ASK_USER_NAME = 2;
     private final int ASK_STATUS = 3;
     private final int ASK_PROFILE_PICTURE = 4;
     private final int FINAL_DESTINATION = 5;
-
-    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
-
+    private final String TAG = getClass().getSimpleName();
     private List<Message> onboardConversation = new ArrayList<>();
     private RecyclerView onboardRecyclerView;
     private MessageAdapter messageAdapter;
@@ -70,9 +70,8 @@ public class OnboardActivity extends AppCompatActivity {
     private FirebaseUser user;
     private Handler handler = new Handler();
 
-    private int onboardStage = 0;
-
     // Onboarding would be like a conversation!
+    private int onboardStage = 0;
 
     /**
      * Sends a message in the context of the Bot (the other member of this chat)
@@ -193,7 +192,7 @@ public class OnboardActivity extends AppCompatActivity {
                         databaseReference.child("profile_pic").addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                if(!dataSnapshot.exists()) {
+                                if (!dataSnapshot.exists()) {
                                     FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child("profile_pic").setValue("default");
                                 }
                             }
@@ -206,7 +205,7 @@ public class OnboardActivity extends AppCompatActivity {
                         databaseReference.child("thumb_pic").addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                if(!dataSnapshot.exists()) {
+                                if (!dataSnapshot.exists()) {
                                     FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child("thumb_pic").setValue("default");
                                 }
                             }
@@ -226,8 +225,6 @@ public class OnboardActivity extends AppCompatActivity {
                 break;
         }
     }
-
-    private final String TAG = getClass().getSimpleName();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -274,7 +271,6 @@ public class OnboardActivity extends AppCompatActivity {
             startActivity(new Intent(this, MainActivity.class));
             finish();
         }
-
 
 
         countryCodePicker = findViewById(R.id.country_code_picker);
@@ -371,7 +367,7 @@ public class OnboardActivity extends AppCompatActivity {
 
     }
 
-    private  boolean checkAndRequestPermissions() {
+    private boolean checkAndRequestPermissions() {
         int permissionReadContacts = ContextCompat.checkSelfPermission(OnboardActivity.this, Manifest.permission.READ_CONTACTS);
         int permissionWriteContacts = ContextCompat.checkSelfPermission(OnboardActivity.this, Manifest.permission.WRITE_CONTACTS);
         int permissionReadStorage = ContextCompat.checkSelfPermission(OnboardActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -390,7 +386,7 @@ public class OnboardActivity extends AppCompatActivity {
             listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
         while (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(OnboardActivity.this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),REQUEST_ID_MULTIPLE_PERMISSIONS);
+            ActivityCompat.requestPermissions(OnboardActivity.this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), REQUEST_ID_MULTIPLE_PERMISSIONS);
             return false;
         }
         return true;
@@ -418,7 +414,7 @@ public class OnboardActivity extends AppCompatActivity {
                             && perms.get(Manifest.permission.WRITE_CONTACTS) == PackageManager.PERMISSION_GRANTED
                             && perms.get(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                             && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                        Log.d("YES","YES");
+                        Log.d("YES", "YES");
                     } else {
                         Log.d("TAG", "Some permissions are not granted ask again ");
                         //permission is denied (this is the first time, when "never ask again" is not checked) so ask again explaining the usage of permission
@@ -442,8 +438,7 @@ public class OnboardActivity extends AppCompatActivity {
                                             }
                                         }
                                     });
-                        }
-                        else {
+                        } else {
                             Toast.makeText(OnboardActivity.this, "Go to settings and enable permissions", Toast.LENGTH_LONG)
                                     .show();
                             //                            //proceed with logic by disabling the related features or quit the app.

@@ -1,16 +1,11 @@
 package vipul.in.mychat.fragment;
 
-import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -38,7 +33,6 @@ import java.util.Map;
 
 import vipul.in.mychat.MarginDividerItemDecoration;
 import vipul.in.mychat.R;
-import vipul.in.mychat.activity.MainActivity;
 import vipul.in.mychat.adapter.ChatListAdapter;
 import vipul.in.mychat.model.User;
 
@@ -191,7 +185,7 @@ public class ChatListFragment extends Fragment {
                                     singleChatAdd.setPhoneNum(record.getKey().toString());
                                     chatList.add(0, singleChatAdd);
                                     chatListAdapter.notifyDataSetChanged();
-                                    Log.d("PEHLA","PEHLA");
+                                    Log.d("PEHLA", "PEHLA");
 
                                     break;
                                 }
@@ -250,17 +244,17 @@ public class ChatListFragment extends Fragment {
                 final User singleChatChange = dataSnapshot.getValue(User.class);
                 Log.d("ChatChange", s + " " + dataSnapshot.getValue().toString());
                 String uid = dataSnapshot.getKey();
-                Log.d("MYNEW" , uid+" Length:"+chatList.size());
+                Log.d("MYNEW", uid + " Length:" + chatList.size());
 
 
-                if(chatList.size() == 0) {
+                if (chatList.size() == 0) {
 
                     Intent intent = getActivity().getIntent();
                     getActivity().finish();
                     startActivity(intent);
 
                 } else {
-                    reflectChanges(singleChatChange,uid);
+                    reflectChanges(singleChatChange, uid);
                 }
             }
 
@@ -282,9 +276,6 @@ public class ChatListFragment extends Fragment {
 
 
         //noooooo
-
-
-
 
 
         return rootView;
@@ -309,7 +300,8 @@ public class ChatListFragment extends Fragment {
         }
         return sortedHashMap;
     }
-    public void reflectChanges(User singleChatChange , String uid) {
+
+    public void reflectChanges(User singleChatChange, String uid) {
 
         singleChatChange.setUid(uid);
         ListIterator<User> iterator = chatList.listIterator();
@@ -321,50 +313,48 @@ public class ChatListFragment extends Fragment {
 
             if (tempUid.equals(uid)) {
 
-                Log.d("MYNEW","mainIf");
+                Log.d("MYNEW", "mainIf");
                 int index = iterator.nextIndex();
 
-                Log.d("ChatChange",chatList.get(index-1).toString());
+                Log.d("ChatChange", chatList.get(index - 1).toString());
                 tempFlag = 1;
 
-                if(chatList.get(index-1).getTimestamp() == singleChatChange.getTimestamp()) {
+                if (chatList.get(index - 1).getTimestamp() == singleChatChange.getTimestamp()) {
 
-                    Log.d("MYNEW","pehlaIf");
+                    Log.d("MYNEW", "pehlaIf");
 
-                    singleChatChange.setName(chatList.get(index-1).getName());
-                    singleChatChange.setPhoneNum(chatList.get(index-1).getPhoneNum());
-                    singleChatChange.setProfile_pic(chatList.get(index-1).getProfile_pic());
-                    singleChatChange.setThumb_pic(chatList.get(index-1).getThumb_pic());
-                    singleChatChange.setIsOnline(chatList.get(index-1).getIsOnline());
-                    singleChatChange.setUid(chatList.get(index-1).getUid());
+                    singleChatChange.setName(chatList.get(index - 1).getName());
+                    singleChatChange.setPhoneNum(chatList.get(index - 1).getPhoneNum());
+                    singleChatChange.setProfile_pic(chatList.get(index - 1).getProfile_pic());
+                    singleChatChange.setThumb_pic(chatList.get(index - 1).getThumb_pic());
+                    singleChatChange.setIsOnline(chatList.get(index - 1).getIsOnline());
+                    singleChatChange.setUid(chatList.get(index - 1).getUid());
 
-                    chatList.remove(index-1);
-                    chatList.add(index-1,singleChatChange);
+                    chatList.remove(index - 1);
+                    chatList.add(index - 1, singleChatChange);
 
+                } else {
+
+                    Log.d("MYNEW", "pehlaElse");
+
+                    singleChatChange.setName(chatList.get(index - 1).getName());
+                    singleChatChange.setPhoneNum(chatList.get(index - 1).getPhoneNum());
+                    singleChatChange.setProfile_pic(chatList.get(index - 1).getProfile_pic());
+                    singleChatChange.setThumb_pic(chatList.get(index - 1).getThumb_pic());
+                    singleChatChange.setIsOnline(chatList.get(index - 1).getIsOnline());
+                    singleChatChange.setUid(chatList.get(index - 1).getUid());
+
+                    chatList.remove(index - 1);
+                    chatList.add(0, singleChatChange);
                 }
-                else {
 
-                    Log.d("MYNEW","pehlaElse");
-
-                    singleChatChange.setName(chatList.get(index-1).getName());
-                    singleChatChange.setPhoneNum(chatList.get(index-1).getPhoneNum());
-                    singleChatChange.setProfile_pic(chatList.get(index-1).getProfile_pic());
-                    singleChatChange.setThumb_pic(chatList.get(index-1).getThumb_pic());
-                    singleChatChange.setIsOnline(chatList.get(index-1).getIsOnline());
-                    singleChatChange.setUid(chatList.get(index-1).getUid());
-
-                    chatList.remove(index-1);
-                    chatList.add(0,singleChatChange);
-                }
-
-            }
-            else {
-                tempFlag = 0 ;
-                Log.d("MYNEW","mainElse");
+            } else {
+                tempFlag = 0;
+                Log.d("MYNEW", "mainElse");
             }
 
-            if(tempFlag == 1) {
-                Log.d("MYNEW","notify");
+            if (tempFlag == 1) {
+                Log.d("MYNEW", "notify");
                 chatListAdapter.notifyDataSetChanged();
                 break;
             }

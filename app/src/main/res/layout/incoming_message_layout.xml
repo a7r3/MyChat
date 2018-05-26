@@ -3,76 +3,76 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
-    android:padding="4dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="4dp">
 
     <include
+        android:id="@+id/start_of_day_view"
         layout="@layout/date_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="4dp"
         android:layout_marginTop="4dp"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/start_of_day_view"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_toEndOf="@id/message_profile_picture"
-        android:layout_below="@id/start_of_day_view"
         android:id="@+id/message_bubble"
-        android:background="@drawable/incoming_card"
-        android:padding="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_below="@id/start_of_day_view"
         android:layout_marginEnd="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_toEndOf="@id/message_profile_picture"
+        android:background="@drawable/incoming_card"
         android:elevation="@dimen/cardview_default_elevation"
         android:minWidth="104dp"
-        android:layout_marginTop="4dp">
+        android:padding="8dp">
 
         <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
-            android:layout_below="@id/name_text_layout"
-            android:paddingLeft="8dp"
             android:id="@+id/message_text_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/name_text_layout"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="4dp"
+            android:paddingLeft="8dp"
             android:textColor="#000000"
             android:textSize="15sp" />
 
         <TextView
-            android:layout_below="@id/message_text_layout"
-            android:layout_alignParentStart="true"
             android:id="@+id/time_text_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="12:00 AM"
-            android:layout_marginTop="4dp"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/message_text_layout"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:text="12:00 AM"
             android:textSize="12sp" />
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/name_text_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:text="Display Name"
             android:textColor="@android:color/black"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
     </RelativeLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_alignParentStart="true"
-        android:layout_alignBottom="@id/message_bubble"
         android:id="@+id/message_profile_picture"
         android:layout_width="36dp"
         android:layout_height="36dp"
+        android:layout_alignBottom="@id/message_bubble"
+        android:layout_alignParentStart="true"
         android:layout_marginStart="4dp"
         android:background="@drawable/round"
         android:src="@drawable/ic_person_black_24dp" />

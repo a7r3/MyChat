@@ -1,7 +1,6 @@
 package vipul.in.mychat.adapter;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -64,7 +62,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
-        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
 
         if ("default".equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
@@ -79,9 +77,9 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
                 Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("clicked", holder.name_from.getText().toString());
                 intent.putExtra("uid", contacts.getUid());
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal",mContext);
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", mContext);
                 intent.putExtra("friendThumb", sharedPreferenceManager.getData(contacts.getUid()));
-                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
                 intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(contacts.getUid()));
                 Log.d("Key", "Key: " + contacts.getUid());
                 mContext.startActivity(intent);
@@ -92,7 +90,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             @Override
             public void onClick(View v) {
                 Intent imageDialogIntent = new Intent(mContext, ImageDialogActivity.class);
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
                 String profile_picture = sharedPreferenceManager.getData(contacts.getUid());
                 if ("default".equals(profile_picture)) {
                     imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);

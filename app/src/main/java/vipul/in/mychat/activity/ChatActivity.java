@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialog;
@@ -42,25 +41,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
 import vipul.in.mychat.R;
 import vipul.in.mychat.Utils;
-import vipul.in.mychat.adapter.ChatListAdapter;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
-import vipul.in.mychat.model.User;
 
 public class ChatActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
@@ -353,8 +345,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
 
-                if (!getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("default") || !getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"null").equals("null")) {
-                    imageView.setImageURI(Uri.parse(getSharedPreferences("picInfoLocal",MODE_PRIVATE).getString(receiverUid,"default")));
+                if (!getSharedPreferences("picInfoLocal", MODE_PRIVATE).getString(receiverUid, "null").equals("default") || !getSharedPreferences("picInfoLocal", MODE_PRIVATE).getString(receiverUid, "null").equals("null")) {
+                    imageView.setImageURI(Uri.parse(getSharedPreferences("picInfoLocal", MODE_PRIVATE).getString(receiverUid, "default")));
 
                 } else {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);

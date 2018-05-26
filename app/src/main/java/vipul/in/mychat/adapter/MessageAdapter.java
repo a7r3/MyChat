@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,15 +39,23 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     // At these positions, the 'Date View' is made visible
     private List<Integer> messageDates = new ArrayList<>();
 
+    public MessageAdapter(List<Message> messageList, Context context, String myThumb, String friendThumb) {
+        this.messageList = messageList;
+        this.context = context;
+        this.myThumb = myThumb;
+        this.friendThumb = friendThumb;
+    }
+
     /**
      * Function to add an message to the Message List
      * And check if this message is the first message of the Day
-     *
+     * <p>
      * If so, record this message's position in a List
      * And Show the 'Date View' for that position
-     *
+     * <p>
      * 'Date View' shows the date, indicates that the messages below it
      * were sent on that Date -- till the next 'Date View'
+     *
      * @param message The message to be added
      */
     public void addMessage(Message message) {
@@ -66,7 +73,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         notifyItemInserted(messageList.size() - 1);
 
         // If this is the first message, the Date View should appear obviously
-        if(latestDate == null) {
+        if (latestDate == null) {
             messageDates.add(messageList.size() - 1);
             latestDate = date;
         }
@@ -74,18 +81,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // If current date is different than the previous date
         // Then mark this position for showing the Date View
         // Showing the Date View indicates the start of conversation on that particular day
-        if(!date.equals(latestDate)) {
+        if (!date.equals(latestDate)) {
             messageDates.add(messageList.size() - 1);
             latestDate = date;
         }
 
-    }
-
-    public MessageAdapter(List<Message> messageList, Context context, String myThumb, String friendThumb) {
-        this.messageList = messageList;
-        this.context = context;
-        this.myThumb = myThumb;
-        this.friendThumb = friendThumb;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // If this message's position is present in the Wanted List
         // Then make the 'Date View' visible
-        if(messageDates.contains(position)) {
+        if (messageDates.contains(position)) {
             holder.dateView.setVisibility(View.VISIBLE);
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
             String date = dateFormat.format(calendar.getTime());

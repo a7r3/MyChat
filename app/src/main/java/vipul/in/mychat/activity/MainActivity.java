@@ -59,12 +59,12 @@ import vipul.in.mychat.fragment.ContactsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final int GALLERY_PICK = 99;
     //Button mBtn;
     //TextView mTextView;
     DatabaseReference mRef;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-    private final int GALLERY_PICK = 99;
     private FirebaseAuth mAuth;
     private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
     private FirebaseUser currentUser;
@@ -122,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
         profileBottomSheetStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 final android.app.Dialog settingsDialog = new android.app.Dialog(MainActivity.this);
 
                 settingsDialog.getWindow().requestFeature(android.view.Window.FEATURE_NO_TITLE);
-                View myView = LayoutInflater.from(MainActivity.this).inflate(R.layout.statusdialog,null);
+                View myView = LayoutInflater.from(MainActivity.this).inflate(R.layout.statusdialog, null);
                 settingsDialog.setContentView(myView);
 
                 final android.widget.EditText newStatus = myView.findViewById(R.id.enterStatus);
@@ -164,11 +163,11 @@ public class MainActivity extends AppCompatActivity {
 
                 ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
-                if ("default".equals(sharedPreferences.getString("profile_pic","default"))) {
+                if ("default".equals(sharedPreferences.getString("profile_pic", "default"))) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
 
                 } else {
-                    Picasso.get().load(sharedPreferences.getString("profile_pic","default")).into(imageView);
+                    Picasso.get().load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
                 }
                 imgDialog.show();
                 //Toast.makeText(MainActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
@@ -381,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
                                                     mProgressDialog.dismiss();
 
                                                     editor.putString("profile_pic", download_url);
-                                                    editor.putString("thumb_pic",thumb_downloadUrl);
+                                                    editor.putString("thumb_pic", thumb_downloadUrl);
 
                                                     Picasso.get().load(Uri.parse(download_url)).into(profileBottomSheetImage);
                                                     //Toast.makeText(getParentFragment().getContext(), "Success Uploading.", Toast.LENGTH_LONG).show();

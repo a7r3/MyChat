@@ -59,7 +59,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.last_message.setText(singleChat.getLastMessage());
 
 
-        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
 
         if ("default".equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
@@ -78,7 +78,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             @Override
             public void onClick(View v) {
                 Intent imageDialogIntent = new Intent(mContext, ImageDialogActivity.class);
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
                 String profile_picture = sharedPreferenceManager.getData(singleChat.getUid());
                 if ("default".equals(profile_picture)) {
                     imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
@@ -101,9 +101,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
                 Intent intent = new Intent(mContext, ChatActivity.class);
                 intent.putExtra("clicked", singleChat.getName());
                 intent.putExtra("uid", singleChat.getUid());
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal",mContext);
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", mContext);
                 intent.putExtra("friendThumb", sharedPreferenceManager.getData(singleChat.getUid()));
-                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal",mContext);
+                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
                 intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(singleChat.getUid()));
                 mContext.startActivity(intent);
 
