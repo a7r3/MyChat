@@ -1,78 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="4dp"
+    android:clipToPadding="false"
+    android:padding="4dp"
     android:orientation="vertical">
 
     <include
         layout="@layout/date_layout"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
         android:id="@+id/start_of_day_view"
         android:visibility="gone"/>
 
-    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/message_single_layout"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_toEndOf="@id/message_profile_picture"
+        android:layout_below="@id/start_of_day_view"
+        android:id="@+id/message_bubble"
+        android:background="@drawable/incoming_card"
+        android:padding="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="48dp"
-        android:layout_marginTop="4dp"
-        app:cardCornerRadius="8dp">
+        android:elevation="@dimen/cardview_default_elevation"
+        android:minWidth="104dp"
+        android:layout_marginTop="4dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
+            android:layout_below="@id/name_text_layout"
+            android:paddingLeft="8dp"
+            android:id="@+id/message_text_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:textColor="#000000"
+            android:textSize="15sp" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/message_profile_picture"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/round"
-                android:src="@drawable/ic_person_black_24dp" />
+        <TextView
+            android:layout_below="@id/message_text_layout"
+            android:layout_alignParentStart="true"
+            android:id="@+id/time_text_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12:00 AM"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="8dp"
+            android:textSize="12sp" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/name_text_layout"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="4dp"
-                android:layout_toEndOf="@id/message_profile_picture"
-                android:orientation="horizontal">
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/name_text_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:text="Display Name"
+            android:textColor="@android:color/black"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
-                <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
-                    android:id="@+id/message_text_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Message Text"
-                    android:textColor="#444444"
-                    android:textSize="14sp" />
+    </RelativeLayout>
 
-                <TextView
-                    android:id="@+id/time_text_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingEnd="8dp"
-                    android:paddingStart="8dp"
-                    android:text="00:00"
-                    android:textSize="12sp" />
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_alignParentStart="true"
+        android:layout_alignBottom="@id/message_bubble"
+        android:id="@+id/message_profile_picture"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/round"
+        android:src="@drawable/ic_person_black_24dp" />
 
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/name_text_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="8dp"
-                android:layout_toEndOf="@+id/message_profile_picture"
-                android:text="Display Name"
-                android:textColor="@android:color/black"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-        </RelativeLayout>
-    </android.support.v7.widget.CardView>
-</LinearLayout>
+</RelativeLayout>

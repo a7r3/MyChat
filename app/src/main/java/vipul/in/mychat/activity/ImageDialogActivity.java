@@ -82,4 +82,5 @@ public class ImageDialogActivity extends Activity {
         TransitionManager.beginDelayedTransition(viewGroup);
         imageDialogDetails.setVisibility(View.VISIBLE);
     }
+
 }

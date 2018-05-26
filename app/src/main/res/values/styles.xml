@@ -8,10 +8,6 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="MessageCard" parent="CardView.Light">
-        <item name="cardBackgroundColor">@color/colorPrimaryLightest</item>
-    </style>
-
     <style name="myDialogTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

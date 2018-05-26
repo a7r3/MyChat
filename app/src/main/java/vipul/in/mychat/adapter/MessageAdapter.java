@@ -2,7 +2,9 @@ package vipul.in.mychat.adapter;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,27 +111,27 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     @Override
-    public void onBindViewHolder(MessageViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
 
         Message message = messageList.get(position);
         String from_user = message.getFrom();
         String message_type = message.getType();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(message.getTime());
 
         // If this message's position is present in the Wanted List
         // Then make the 'Date View' visible
         if(messageDates.contains(position)) {
             holder.dateView.setVisibility(View.VISIBLE);
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(message.getTime());
             String date = dateFormat.format(calendar.getTime());
             holder.dateText.setText(date);
+        } else {
+            holder.dateView.setVisibility(View.GONE);
         }
 
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(message.getTime());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         String time = dateFormat.format(calendar.getTime());
         holder.messageTime.setText(time);
 
