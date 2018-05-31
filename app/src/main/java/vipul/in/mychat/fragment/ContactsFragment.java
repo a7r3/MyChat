@@ -1,6 +1,5 @@
 package vipul.in.mychat.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -53,7 +52,6 @@ import vipul.in.mychat.model.User;
 
 public class ContactsFragment extends Fragment {
 
-    private DatabaseReference userDatabaseReference;
     SharedPreferences sharedPreferencesThumb;
     SharedPreferences.Editor editorThumb;
     SharedPreferences sharedPreferencesPic;
@@ -62,6 +60,7 @@ public class ContactsFragment extends Fragment {
     SharedPreferences.Editor editorThumbLive;
     SharedPreferences sharedPreferencesPicLive;
     SharedPreferences.Editor editorPicLive;
+    private DatabaseReference userDatabaseReference;
     private ContactsAdapter adapter;
     private List<User> userList;
     private String currUid;
@@ -174,6 +173,7 @@ public class ContactsFragment extends Fragment {
 
     /**
      * Saves Profile Pictures / Thumbnails of the User to Internal/External Storage
+     *
      * @param contact The User whose profile picture has to be saved
      */
     public void saveProfilePictures(User contact) {

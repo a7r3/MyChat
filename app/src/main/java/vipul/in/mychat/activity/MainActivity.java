@@ -1,10 +1,8 @@
 package vipul.in.mychat.activity;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -84,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private View settingsBottomSheetView;
     private FloatingActionButton imageSelectorButton;
     private ImageView statusEditorButton;
+    private boolean isSnackBarShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -286,8 +285,6 @@ public class MainActivity extends AppCompatActivity {
             FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
         }
     }
-
-    private boolean isSnackBarShown = false;
 
     @Override
     public void onBackPressed() {

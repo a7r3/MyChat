@@ -92,7 +92,7 @@ public class ImageDialogActivity extends AppCompatActivity {
         Rect imageDialogRect = new Rect();
         imageDialog.getGlobalVisibleRect(imageDialogRect);
         // If the Point (x, y) is not inside the Image Dialog
-        if(!imageDialogRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
+        if (!imageDialogRect.contains((int) ev.getRawX(), (int) ev.getRawY())) {
             // Finish the Activity after reversing SharedElement transition
             // TransitionManager.beginDelayedTransition(viewGroup);
             imageDialogDetails.setVisibility(View.GONE);

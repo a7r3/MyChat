@@ -2,5 +2,5 @@
     android:id="@+id/chatListRecycler"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:transitionGroup="false"
-    android:clipChildren="false"/>
+    android:clipChildren="false"
+    android:transitionGroup="false" />

@@ -10,9 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.transition.Explode;
 import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,8 +40,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 
 
     Context mContext;
-    private Activity activity;
     List<User> singleChats;
+    private Activity activity;
 
     public ChatListAdapter(Context context, List<User> singleChats, Activity activity) {
 

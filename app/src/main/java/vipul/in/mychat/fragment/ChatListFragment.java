@@ -155,7 +155,7 @@ public class ChatListFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot ds) {
                         String phoneNum = ds.child("phoneNum").getValue(String.class);
-                        if(phoneToNameMap.containsKey(phoneNum)) {
+                        if (phoneToNameMap.containsKey(phoneNum)) {
                             singleChatAdd.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
                             singleChatAdd.setProfile_pic(ds.child("profile_pic").getValue(String.class));
                             singleChatAdd.setIsOnline(ds.child("isOnline").getValue(String.class));
