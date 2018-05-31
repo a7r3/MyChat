@@ -15,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,8 +53,7 @@ import vipul.in.mychat.model.User;
 
 public class ContactsFragment extends Fragment {
 
-    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
-    DatabaseReference mRef;
+    private DatabaseReference userDatabaseReference;
     SharedPreferences sharedPreferencesThumb;
     SharedPreferences.Editor editorThumb;
     SharedPreferences sharedPreferencesPic;
@@ -66,9 +64,6 @@ public class ContactsFragment extends Fragment {
     SharedPreferences.Editor editorPicLive;
     private ContactsAdapter adapter;
     private List<User> userList;
-    private Activity activity;
-    private DatabaseReference userDatabaseReference;
-    private Context context;
     private String currUid;
     private RecyclerView contactsRecyclerView;
 
@@ -92,11 +87,11 @@ public class ContactsFragment extends Fragment {
         return sortedHashMap;
     }
 
-
     public void fetch_data() {
 
-        mRef = FirebaseDatabase.getInstance().getReference().child("Users");
-        mRef.keepSynced(true);
+        userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
+        userDatabaseReference.keepSynced(true);
+
         Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         HashMap<String, String> hm = new HashMap<String, String>();
         while (phones.moveToNext()) {
@@ -110,225 +105,54 @@ public class ContactsFragment extends Fragment {
             hm.put(phoneNumber, name);
         }
 
-        final HashMap hashMap2 = sortByValues(hm);
-        Log.d("All contacts: ", hashMap2.toString());
+        final HashMap phoneToNameMap = sortByValues(hm);
         phones.close();
-
-        Iterator iterator = hashMap2.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry record = (Map.Entry) iterator.next();
-            mRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    User contact = dataSnapshot.getValue(User.class);
-                    String k = dataSnapshot.child("phoneNum").getValue(String.class);
-
-
-                    if (k.equals(record.getKey().toString())) {
-                        contact.setName(record.getValue().toString());
-                        contact.setUid(dataSnapshot.getKey());
-                        userList.add(contact);
-                        final String frndUid = dataSnapshot.getKey();
-                        FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(frndUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot ds) {
-                                if (!ds.exists()) {
-                                    FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(frndUid).child("name").setValue(record.getValue().toString());
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
-                        if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("null")) {
-                            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
-                            editorThumbLive.apply();
-
-                            if (contact.getThumb_pic().equals("default")) {
-                                editorThumb.putString(contact.getUid(), "default");
-                                editorThumb.apply();
-                            } else {
-
-                                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
-                                File thumbDir = new File(thumbPath);
-                                if (!thumbDir.exists()) {
-                                    thumbDir.mkdirs();
-                                }
-                                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
-                                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
-
-                                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
-                                editorThumb.apply();
-
-                            }
-                        } else if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("default")) {
-                            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
-                            editorThumbLive.apply();
-
-                            editorThumb.putString(contact.getUid(), "default");
-                            editorThumb.apply();
-                        } else if (!sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals(contact.getThumb_pic())) {
-                            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
-                            editorThumbLive.apply();
-
-                            if (contact.getThumb_pic().equals("default")) {
-                                editorThumb.putString(contact.getUid(), "default");
-                                editorThumb.apply();
-                            } else {
-
-                                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
-                                File thumbDir = new File(thumbPath);
-                                if (!thumbDir.exists()) {
-                                    thumbDir.mkdirs();
-                                }
-                                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
-                                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
-
-                                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
-                                editorThumb.apply();
-                            }
-
-                        }
-
-                        if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("null")) {
-                            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
-                            editorPicLive.apply();
-
-                            if (contact.getProfile_pic().equals("default")) {
-                                editorPic.putString(contact.getUid(), "default");
-                                editorPic.apply();
-                            } else {
-                                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
-                                File picDir = new File(picPath);
-                                if (!picDir.exists()) {
-                                    picDir.mkdirs();
-                                }
-                                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
-                                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
-
-                                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
-                                editorPic.apply();
-                            }
-                        } else if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("default")) {
-                            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
-                            editorPicLive.apply();
-
-                            editorPic.putString(contact.getUid(), "default");
-                            editorPic.apply();
-                        } else if (!sharedPreferencesPicLive.getString(contact.getUid(), "null").equals(contact.getProfile_pic())) {
-                            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
-                            editorPicLive.apply();
-
-                            if (contact.getProfile_pic().equals("default")) {
-                                editorPic.putString(contact.getUid(), "default");
-                                editorPic.apply();
-                            } else {
-                                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
-                                File picDir = new File(picPath);
-                                if (!picDir.exists()) {
-                                    picDir.mkdirs();
-                                }
-                                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
-                                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
-
-                                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
-                                editorPic.apply();
-                            }
-
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    User contacts = dataSnapshot.getValue(User.class);
-                    ListIterator<User> it = userList.listIterator();
-                    int tempFlag = 0;
-                    while (it.hasNext()) {
-                        if (it.next().getPhoneNum().equals(contacts.getPhoneNum())) {
-                            int index = it.nextIndex();
-                            String tempName = userList.get(index - 1).getName();
-                            userList.remove(index - 1);
-                            contacts.setName(tempName);
-                            contacts.setUid(dataSnapshot.getKey());
-                            userList.add(index - 1, contacts);
-                            //Log.d("Changed", "Changed " + index);
-                            tempFlag = 1;
-                        }
-                        if (tempFlag == 1) {
-                            adapter.notifyDataSetChanged();
-                            break;
-                        }
-
-                    }
-                    //Log.d("Changed Values : ",contacts.getName()+"\n"+contacts.getPhoneNum()+"\n"+contacts.isOnline()+"\n"+contacts.getDevice_token());
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-    }
-
-
-    /*
-
-    public void fetch_data() {
-
-        Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-
-        final HashMap<String, String> hm = new HashMap<String, String>();
-        while (phones.moveToNext()) {
-            String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-            String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-            phoneNumber = phoneNumber.replace(" ", "");
-            phoneNumber = phoneNumber.replace("-", "");
-            if (phoneNumber.charAt(0) != '+') {
-                phoneNumber = "+91" + phoneNumber;
-            }
-            hm.put(phoneNumber, name);
-        }
-        phones.close();
-
-        userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
-//        userDatabaseReference.keepSynced(true);
 
         userDatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                User user = dataSnapshot.getValue(User.class);
-                if(user == null || s == null) return;
-                for (Map.Entry kvPair : hm.entrySet()) {
-                    if (user.getPhoneNum().equals(kvPair.getKey())) {
-                        user.setName(kvPair.getValue().toString());
-                        user.setUid(s);
-                        Log.d("Lol", "User Added");
-                        userList.add(user);
-                        adapter.notifyDataSetChanged();
+                User contact = dataSnapshot.getValue(User.class);
+                final String phoneNum = dataSnapshot.child("phoneNum").getValue(String.class);
+
+                if (!phoneToNameMap.containsKey(phoneNum)) return;
+
+                contact.setName(phoneToNameMap.get(phoneNum).toString());
+                contact.setUid(dataSnapshot.getKey());
+                userList.add(contact);
+                adapter.notifyItemInserted(userList.size() - 1);
+                final String friendUid = dataSnapshot.getKey();
+                FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(friendUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot ds) {
+                        if (!ds.exists()) {
+                            FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(friendUid).child("name").setValue(phoneToNameMap.get(phoneNum).toString());
+                        }
                     }
-                }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                saveProfilePictures(contact);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                User contact = dataSnapshot.getValue(User.class);
+                ListIterator<User> it = userList.listIterator();
+                while (it.hasNext()) {
+                    if (it.next().getPhoneNum().equals(contact.getPhoneNum())) {
+                        int index = it.nextIndex();
+                        String tempName = userList.get(index - 1).getName();
+                        userList.remove(index - 1);
+                        contact.setName(tempName);
+                        contact.setUid(dataSnapshot.getKey());
+                        userList.add(index - 1, contact);
+                        adapter.notifyItemChanged(index - 1);
+                        break;
+                    }
+                }
             }
 
             @Override
@@ -346,13 +170,109 @@ public class ContactsFragment extends Fragment {
 
             }
         });
-
-        adapter = new UserAdapter(getContext(), userList, UserAdapter.MODE_SHOW_CONTACTS);
-        contactsRecyclerView.setAdapter(adapter);
-
     }
 
-    */
+    /**
+     * Saves Profile Pictures / Thumbnails of the User to Internal/External Storage
+     * @param contact The User whose profile picture has to be saved
+     */
+    public void saveProfilePictures(User contact) {
+        if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("null")) {
+            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
+            editorThumbLive.apply();
+
+            if (contact.getThumb_pic().equals("default")) {
+                editorThumb.putString(contact.getUid(), "default");
+                editorThumb.apply();
+            } else {
+                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
+                File thumbDir = new File(thumbPath);
+                if (!thumbDir.exists()) {
+                    thumbDir.mkdirs();
+                }
+                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
+                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
+
+                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
+                editorThumb.apply();
+
+            }
+
+        } else if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("default")) {
+            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
+            editorThumbLive.apply();
+
+            editorThumb.putString(contact.getUid(), "default");
+            editorThumb.apply();
+        } else if (!sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals(contact.getThumb_pic())) {
+            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
+            editorThumbLive.apply();
+
+            if (contact.getThumb_pic().equals("default")) {
+                editorThumb.putString(contact.getUid(), "default");
+                editorThumb.apply();
+            } else {
+
+                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
+                File thumbDir = new File(thumbPath);
+                if (!thumbDir.exists()) {
+                    thumbDir.mkdirs();
+                }
+                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
+                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
+
+                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
+                editorThumb.apply();
+            }
+
+        }
+
+        if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("null")) {
+            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
+            editorPicLive.apply();
+
+            if (contact.getProfile_pic().equals("default")) {
+                editorPic.putString(contact.getUid(), "default");
+                editorPic.apply();
+            } else {
+                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
+                File picDir = new File(picPath);
+                if (!picDir.exists()) {
+                    picDir.mkdirs();
+                }
+                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
+                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
+
+                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
+                editorPic.apply();
+            }
+        } else if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("default")) {
+            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
+            editorPicLive.apply();
+
+            editorPic.putString(contact.getUid(), "default");
+            editorPic.apply();
+        } else if (!sharedPreferencesPicLive.getString(contact.getUid(), "null").equals(contact.getProfile_pic())) {
+            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
+            editorPicLive.apply();
+
+            if (contact.getProfile_pic().equals("default")) {
+                editorPic.putString(contact.getUid(), "default");
+                editorPic.apply();
+            } else {
+                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
+                File picDir = new File(picPath);
+                if (!picDir.exists()) {
+                    picDir.mkdirs();
+                }
+                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
+                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
+
+                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
+                editorPic.apply();
+            }
+        }
+    }
 
     @Override
     public void onStart() {
@@ -367,7 +287,6 @@ public class ContactsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
 
         userList = new ArrayList<>();
-        context = container.getContext();
 
         sharedPreferencesThumb = getContext().getSharedPreferences("thumbInfoLocal", Context.MODE_PRIVATE);
         editorThumb = sharedPreferencesThumb.edit();
@@ -381,8 +300,7 @@ public class ContactsFragment extends Fragment {
         sharedPreferencesPicLive = getContext().getSharedPreferences("picInfoLive", Context.MODE_PRIVATE);
         editorPicLive = sharedPreferencesPicLive.edit();
 
-        adapter = new ContactsAdapter(rootView.getContext(), userList);
-
+        adapter = new ContactsAdapter(getActivity(), rootView.getContext(), userList);
 
         contactsRecyclerView = rootView.findViewById(R.id.contacts_recyclerView);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
@@ -390,7 +308,6 @@ public class ContactsFragment extends Fragment {
         MarginDividerItemDecoration itemDecoration = new MarginDividerItemDecoration(getContext());
         contactsRecyclerView.addItemDecoration(itemDecoration);
         contactsRecyclerView.setAdapter(adapter);
-        activity = getActivity();
 
         fetch_data();
 
@@ -422,7 +339,7 @@ public class ContactsFragment extends Fragment {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
                 byte[] BYTE = bos.toByteArray();
-                OutputStream ous = null;
+                OutputStream ous;
                 ous = new FileOutputStream(file);
                 ous.write(BYTE);
                 ous.close();

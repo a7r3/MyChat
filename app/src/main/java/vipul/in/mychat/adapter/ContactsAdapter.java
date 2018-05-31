@@ -15,8 +15,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -30,19 +28,19 @@ import vipul.in.mychat.model.User;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> {
 
-    private Context mContext;
+    private Context context;
     private List<User> contactsList;
-    private DatabaseReference dbRef;
-    private FirebaseUser cUser;
+    private Activity activity;
 
-    public ContactsAdapter(Context mContext, List<User> contactsList) {
-        this.mContext = mContext;
+    public ContactsAdapter(Activity activity, Context context, List<User> contactsList) {
+        this.activity = activity;
+        this.context = context;
         this.contactsList = contactsList;
     }
 
     @Override
     public ContactsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.user, parent, false);
         return new ContactsViewHolder(view);
     }
@@ -54,15 +52,13 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         holder.name_from.setText(contacts.getName());
         holder.last_message.setText(contacts.getStatus());
 
-        cUser = FirebaseAuth.getInstance().getCurrentUser();
-
         if ("true".equals(contacts.getIsOnline())) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
         } else {
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
-        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
+        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", context);
 
         if ("default".equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
@@ -70,27 +66,26 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
         }
 
-
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(mContext, ChatActivity.class);
+                Intent intent = new Intent(activity, ChatActivity.class);
                 intent.putExtra("clicked", holder.name_from.getText().toString());
                 intent.putExtra("uid", contacts.getUid());
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", mContext);
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", context);
                 intent.putExtra("friendThumb", sharedPreferenceManager.getData(contacts.getUid()));
-                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
+                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", context);
                 intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(contacts.getUid()));
                 Log.d("Key", "Key: " + contacts.getUid());
-                mContext.startActivity(intent);
+                activity.startActivity(intent);
             }
         });
 
         holder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent imageDialogIntent = new Intent(mContext, ImageDialogActivity.class);
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
+                Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
+                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", context);
                 String profile_picture = sharedPreferenceManager.getData(contacts.getUid());
                 if ("default".equals(profile_picture)) {
                     imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
@@ -100,9 +95,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, contacts.getName());
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, contacts.getUid());
 
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) mContext, holder.thumbnail, "image_transition");
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.thumbnail, "image_transition");
 
-                mContext.startActivity(imageDialogIntent, options.toBundle());
+                activity.startActivity(imageDialogIntent, options.toBundle());
+                activity.overridePendingTransition(0,0);
             }
         });
 
@@ -122,7 +118,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         CircleImageView thumbnail;
 
         public ContactsViewHolder(View itemView) {
-
             super(itemView);
             relativeLayout = itemView.findViewById(R.id.relativeSingleChat);
             name_from = itemView.findViewById(R.id.user_name);

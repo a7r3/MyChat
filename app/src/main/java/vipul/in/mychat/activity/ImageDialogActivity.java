@@ -1,12 +1,11 @@
 package vipul.in.mychat.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.transition.TransitionManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import com.squareup.picasso.Picasso;
 import vipul.in.mychat.R;
 import vipul.in.mychat.SharedPreferenceManager;
 
-public class ImageDialogActivity extends Activity {
+public class ImageDialogActivity extends AppCompatActivity {
 
     public static final String CHAT_NAME_EXTRA = "chat_name";
     public static final String IMAGE_URI_EXTRA = "chat_profile_image_uri";
@@ -63,7 +62,6 @@ public class ImageDialogActivity extends Activity {
             }
         });
 
-
         imageDialogChatName.setText(chatName);
 
         Picasso.get().load(Uri.parse(imageUri)).placeholder(R.drawable.ic_person_black_24dp).into(imageDialogProfilePicture, new Callback() {
@@ -84,6 +82,12 @@ public class ImageDialogActivity extends Activity {
     }
 
     @Override
+    public void onBackPressed() {
+        supportFinishAfterTransition();
+        super.onBackPressed();
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         Rect imageDialogRect = new Rect();
         imageDialog.getGlobalVisibleRect(imageDialogRect);
@@ -92,7 +96,7 @@ public class ImageDialogActivity extends Activity {
             // Finish the Activity after reversing SharedElement transition
             // TransitionManager.beginDelayedTransition(viewGroup);
             imageDialogDetails.setVisibility(View.GONE);
-            finishAfterTransition();
+            supportFinishAfterTransition();
         }
         return super.dispatchTouchEvent(ev);
     }

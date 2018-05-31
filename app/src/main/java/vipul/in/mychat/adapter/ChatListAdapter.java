@@ -4,12 +4,21 @@ package vipul.in.mychat.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.transition.Explode;
+import android.support.transition.Transition;
+import android.support.transition.TransitionManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,12 +42,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 
 
     Context mContext;
+    private Activity activity;
     List<User> singleChats;
 
-    public ChatListAdapter(Context context, List<User> singleChats) {
+    public ChatListAdapter(Context context, List<User> singleChats, Activity activity) {
 
         this.mContext = context;
         this.singleChats = singleChats;
+        this.activity = activity;
 
     }
 
@@ -77,7 +88,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.thumbnail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent imageDialogIntent = new Intent(mContext, ImageDialogActivity.class);
+                Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
                 SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
                 String profile_picture = sharedPreferenceManager.getData(singleChat.getUid());
                 if ("default".equals(profile_picture)) {
@@ -88,9 +99,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, singleChat.getName());
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, singleChat.getUid());
 
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) mContext, holder.thumbnail, "image_transition");
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.thumbnail, "image_transition");
 
-                mContext.startActivity(imageDialogIntent, options.toBundle());
+                activity.startActivity(imageDialogIntent, options.toBundle());
+                activity.overridePendingTransition(0, 0);
             }
         });
 
@@ -98,14 +110,59 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(mContext, ChatActivity.class);
-                intent.putExtra("clicked", singleChat.getName());
-                intent.putExtra("uid", singleChat.getUid());
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", mContext);
-                intent.putExtra("friendThumb", sharedPreferenceManager.getData(singleChat.getUid()));
-                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
-                intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(singleChat.getUid()));
-                mContext.startActivity(intent);
+                final Rect viewRect = new Rect();
+                view.getGlobalVisibleRect(viewRect);
+
+                Transition explode = new Explode();
+                explode.setEpicenterCallback(new Transition.EpicenterCallback() {
+                    @Override
+                    public Rect onGetEpicenter(@NonNull Transition transition) {
+                        return viewRect;
+                    }
+                });
+                explode.excludeTarget(view, true);
+                explode.addListener(new Transition.TransitionListener() {
+                    @Override
+                    public void onTransitionStart(@NonNull Transition transition) {
+                        Log.d("ChatListAdapter", transition.getName() + " start");
+                    }
+
+                    @Override
+                    public void onTransitionEnd(@NonNull Transition transition) {
+                        Log.d("ChatListAdapter", transition.getName() + " end");
+                        Intent intent = new Intent(activity, ChatActivity.class);
+                        intent.putExtra("clicked", singleChat.getName());
+                        intent.putExtra("uid", singleChat.getUid());
+                        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", mContext);
+                        intent.putExtra("friendThumb", sharedPreferenceManager.getData(singleChat.getUid()));
+                        sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
+                        intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(singleChat.getUid()));
+                        activity.startActivity(intent);
+                    }
+
+                    @Override
+                    public void onTransitionCancel(@NonNull Transition transition) {
+
+                    }
+
+                    @Override
+                    public void onTransitionPause(@NonNull Transition transition) {
+
+                    }
+
+                    @Override
+                    public void onTransitionResume(@NonNull Transition transition) {
+
+                    }
+                });
+
+                explode.setDuration(2000);
+                explode.setInterpolator(new AccelerateDecelerateInterpolator());
+
+                TransitionManager.beginDelayedTransition(
+                        (ViewGroup) activity.getWindow().getDecorView().getRootView(),
+                        explode
+                );
 
             }
         });

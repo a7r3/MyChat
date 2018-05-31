@@ -19,6 +19,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,13 +42,12 @@ public class ChatListFragment extends Fragment {
 
     private final String TAG = getClass().getSimpleName();
 
-    HashMap<String, String> hashMap2;
+    HashMap phoneToNameMap;
     DatabaseReference mRef;
     private RecyclerView chatListRecycler;
     private List<User> chatList;
     private ChatListAdapter chatListAdapter;
     private Context context;
-    private DatabaseReference chatDatabaseReference;
     private String currUid;
 
     public ChatListFragment() {
@@ -65,7 +65,7 @@ public class ChatListFragment extends Fragment {
 
         chatList = new ArrayList<>();
 
-        chatListAdapter = new ChatListAdapter(rootView.getContext(), chatList);
+        chatListAdapter = new ChatListAdapter(rootView.getContext(), chatList, getActivity());
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(rootView.getContext());
         MarginDividerItemDecoration itemDecoration = new MarginDividerItemDecoration(getContext());
         chatListRecycler.addItemDecoration(itemDecoration);
@@ -75,59 +75,53 @@ public class ChatListFragment extends Fragment {
         //fetch_chats();
 
 
-        FirebaseDatabase.getInstance().getReference().child("Users").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                User newChat = dataSnapshot.getValue(User.class);
-                Log.d("MYBIG", newChat.getPhoneNum() + " --number");
-                ListIterator<User> listIterator = chatList.listIterator();
-
-                int tempFlag = 0;
-                while (listIterator.hasNext()) {
-
-                    if (listIterator.next().getPhoneNum().equals(dataSnapshot.child("phoneNum").getValue(String.class))) {
-                        int index = listIterator.nextIndex();
-                        Log.d("MYBIG", chatList.get(index - 1).getPhoneNum() + " --compare_number");
-                        newChat.setTimestamp(chatList.get(index - 1).getTimestamp());
-                        newChat.setLastMessage(chatList.get(index - 1).getLastMessage());
-                        newChat.setSeen(chatList.get(index - 1).isSeen());
-                        newChat.setUid(chatList.get(index - 1).getUid());
-                        newChat.setName(chatList.get(index - 1).getName());
-                        chatList.remove(index - 1);
-                        chatList.add(index - 1, newChat);
-                        tempFlag = 1;
-                    }
-                    if (tempFlag == 1) {
-                        chatListAdapter.notifyDataSetChanged();
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        //yesssss
-
+//        FirebaseDatabase.getInstance().getReference().child("Users").addChildEventListener(new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//                User newChat = dataSnapshot.getValue(User.class);
+//                ListIterator<User> listIterator = chatList.listIterator();
+//
+//                int tempFlag = 0;
+//                while (listIterator.hasNext()) {
+//                    if (listIterator.next().getPhoneNum().equals(dataSnapshot.child("phoneNum").getValue(String.class))) {
+//                        int index = listIterator.nextIndex();
+//                        newChat.setTimestamp(chatList.get(index - 1).getTimestamp());
+//                        newChat.setLastMessage(chatList.get(index - 1).getLastMessage());
+//                        newChat.setSeen(chatList.get(index - 1).isSeen());
+//                        newChat.setUid(chatList.get(index - 1).getUid());
+//                        newChat.setName(chatList.get(index - 1).getName());
+//                        chatList.remove(index - 1);
+//                        chatList.add(index - 1, newChat);
+//                        tempFlag = 1;
+//                    }
+//                    if (tempFlag == 1) {
+//                        chatListAdapter.notifyDataSetChanged();
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onChildRemoved(DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
 
         Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         HashMap<String, String> hm = new HashMap<String, String>();
@@ -142,10 +136,8 @@ public class ChatListFragment extends Fragment {
             hm.put(phoneNumber, name);
         }
 
-        hashMap2 = sortByValues(hm);
-        Log.d("All contacts: ", hashMap2.toString());
+        phoneToNameMap = sortByValues(hm);
         phones.close();
-
 
         mRef = FirebaseDatabase.getInstance().getReference();
 
@@ -155,80 +147,23 @@ public class ChatListFragment extends Fragment {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 final User singleChatAdd = dataSnapshot.getValue(User.class);
-                Log.d("ChatList", " " + dataSnapshot.getValue().toString());
                 final String uid = dataSnapshot.getKey();
-
-//                Log.d("MYLOGS", "log" + uid);
 
                 singleChatAdd.setUid(uid);
 
-                FirebaseDatabase.getInstance().getReference().child("Users").addChildEventListener(new ChildEventListener() {
+                FirebaseDatabase.getInstance().getReference().child("Users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onChildAdded(DataSnapshot ds, String s) {
-
-
-                        if (ds.getKey().toString().equals(uid)) {
-//                            Log.d("MYLOGS", "log" + ds.toString());
-                            Iterator iterator = hashMap2.entrySet().iterator();
-                            final User tempUser = ds.getValue(User.class);
-                            while (iterator.hasNext()) {
-
-                                Map.Entry record = (Map.Entry) iterator.next();
-//                                Log.d("MYLOGS", record.getKey().toString());
-//                                Log.d("MYLOGS", tempUser.getPhoneNum()/*child("phoneNum").getValue(String.class)*/);
-                                if (ds.child("phoneNum").getValue(String.class).equals(record.getKey().toString())) {
-
-                                    singleChatAdd.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
-                                    singleChatAdd.setProfile_pic(ds.child("profile_pic").getValue(String.class));
-                                    singleChatAdd.setIsOnline(ds.child("isOnline").getValue(String.class));
-                                    singleChatAdd.setName(record.getValue().toString());
-                                    singleChatAdd.setPhoneNum(record.getKey().toString());
-                                    chatList.add(0, singleChatAdd);
-                                    chatListAdapter.notifyDataSetChanged();
-                                    Log.d("PEHLA", "PEHLA");
-
-                                    break;
-                                }
-                            }
+                    public void onDataChange(DataSnapshot ds) {
+                        String phoneNum = ds.child("phoneNum").getValue(String.class);
+                        if(phoneToNameMap.containsKey(phoneNum)) {
+                            singleChatAdd.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
+                            singleChatAdd.setProfile_pic(ds.child("profile_pic").getValue(String.class));
+                            singleChatAdd.setIsOnline(ds.child("isOnline").getValue(String.class));
+                            singleChatAdd.setName(phoneToNameMap.get(phoneNum).toString());
+                            singleChatAdd.setPhoneNum(phoneNum);
+                            chatList.add(0, singleChatAdd);
+                            chatListAdapter.notifyDataSetChanged();
                         }
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot ds, String s) {
-
-//                        if (ds.getKey().toString().equals(uid)) {
-////                            Log.d("MYLOGS", "log" + ds.toString());
-//                            Iterator iterator = hashMap2.entrySet().iterator();
-//                            final User tempUser = ds.getValue(User.class);
-//                            while (iterator.hasNext()) {
-//
-//                                Map.Entry record = (Map.Entry) iterator.next();
-////                                Log.d("MYLOGS", record.getKey().toString());
-////                                Log.d("MYLOGS", tempUser.getPhoneNum()/*child("phoneNum").getValue(String.class)*/);
-//                                if (ds.child("phoneNum").getValue(String.class).equals(record.getKey().toString())) {
-//
-//                                    singleChatAdd.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
-//                                    singleChatAdd.setProfile_pic(ds.child("profile_pic").getValue(String.class));
-//                                    singleChatAdd.setIsOnline(ds.child("isOnline").getValue(String.class));
-//                                    singleChatAdd.setName(record.getValue().toString());
-//                                    singleChatAdd.setPhoneNum(record.getKey().toString());
-//                                    chatList.add(0, singleChatAdd);
-//                                    chatListAdapter.notifyDataSetChanged();
-//                                    Log.d("PEHLA","DUSRA");
-//                                    break;
-//                                }
-//                            }
-//                        }
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot ds) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot ds, String s) {
-
                     }
 
                     @Override
@@ -236,6 +171,8 @@ public class ChatListFragment extends Fragment {
 
                     }
                 });
+
+
             }
 
             @Override
@@ -244,8 +181,6 @@ public class ChatListFragment extends Fragment {
                 final User singleChatChange = dataSnapshot.getValue(User.class);
                 Log.d("ChatChange", s + " " + dataSnapshot.getValue().toString());
                 String uid = dataSnapshot.getKey();
-                Log.d("MYNEW", uid + " Length:" + chatList.size());
-
 
                 if (chatList.size() == 0) {
 
@@ -273,11 +208,6 @@ public class ChatListFragment extends Fragment {
 
             }
         });
-
-
-        //noooooo
-
-
         return rootView;
     }
 
@@ -309,52 +239,39 @@ public class ChatListFragment extends Fragment {
         while (iterator.hasNext()) {
 
             String tempUid = iterator.next().getUid();
-            //Log.d("MYNEW","tempUid"+tempUid);
-
             if (tempUid.equals(uid)) {
-
-                Log.d("MYNEW", "mainIf");
                 int index = iterator.nextIndex();
 
                 Log.d("ChatChange", chatList.get(index - 1).toString());
                 tempFlag = 1;
 
                 if (chatList.get(index - 1).getTimestamp() == singleChatChange.getTimestamp()) {
-
-                    Log.d("MYNEW", "pehlaIf");
-
                     singleChatChange.setName(chatList.get(index - 1).getName());
                     singleChatChange.setPhoneNum(chatList.get(index - 1).getPhoneNum());
                     singleChatChange.setProfile_pic(chatList.get(index - 1).getProfile_pic());
                     singleChatChange.setThumb_pic(chatList.get(index - 1).getThumb_pic());
                     singleChatChange.setIsOnline(chatList.get(index - 1).getIsOnline());
                     singleChatChange.setUid(chatList.get(index - 1).getUid());
-
                     chatList.remove(index - 1);
                     chatList.add(index - 1, singleChatChange);
-
+                    chatListAdapter.notifyItemChanged(index - 1);
                 } else {
-
-                    Log.d("MYNEW", "pehlaElse");
-
                     singleChatChange.setName(chatList.get(index - 1).getName());
                     singleChatChange.setPhoneNum(chatList.get(index - 1).getPhoneNum());
                     singleChatChange.setProfile_pic(chatList.get(index - 1).getProfile_pic());
                     singleChatChange.setThumb_pic(chatList.get(index - 1).getThumb_pic());
                     singleChatChange.setIsOnline(chatList.get(index - 1).getIsOnline());
                     singleChatChange.setUid(chatList.get(index - 1).getUid());
-
                     chatList.remove(index - 1);
                     chatList.add(0, singleChatChange);
+                    chatListAdapter.notifyItemMoved(index - 1, 0);
                 }
 
             } else {
                 tempFlag = 0;
-                Log.d("MYNEW", "mainElse");
             }
 
             if (tempFlag == 1) {
-                Log.d("MYNEW", "notify");
                 chatListAdapter.notifyDataSetChanged();
                 break;
             }

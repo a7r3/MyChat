@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -170,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
                     Picasso.get().load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
                 }
                 imgDialog.show();
-                //Toast.makeText(MainActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -287,21 +287,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isSnackBarShown = false;
+
     @Override
     public void onBackPressed() {
-
-        new AlertDialog.Builder(this).setTitle("Exit")
-                .setMessage("Press Yes to log-out from this session")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.addCategory(Intent.CATEGORY_HOME);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                    }
-                }).setNegativeButton("No", null).show();
+        if (!isSnackBarShown) {
+            Snackbar.make(getWindow().getDecorView().getRootView(), "Press back again to exit", Snackbar.LENGTH_LONG).show();
+            isSnackBarShown = true;
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
