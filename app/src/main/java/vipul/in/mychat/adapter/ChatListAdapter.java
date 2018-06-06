@@ -67,9 +67,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.name_from.setText(singleChat.getName());
         holder.last_message.setText(singleChat.getLastMessage());
 
-
-        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
-
         if ("default".equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {

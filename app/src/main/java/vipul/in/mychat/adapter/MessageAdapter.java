@@ -3,10 +3,13 @@ package vipul.in.mychat.adapter;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -20,6 +23,7 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import vipul.in.mychat.R;
+import vipul.in.mychat.Utils;
 import vipul.in.mychat.model.Message;
 
 /**
@@ -114,6 +118,25 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
 
         Message message = messageList.get(position);
+
+        String currentMessageUser = messageList.get(position).getFrom();
+
+        if(position != getItemCount() - 1) {
+            String nextMessageUser = messageList.get(position + 1).getFrom();
+            if(!currentMessageUser.equals(nextMessageUser)) {
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.messageBubble.getLayoutParams();
+                params.bottomMargin = (int) Utils.convertDpToPixel(8.0f, context);
+                holder.messageBubble.setLayoutParams(params);
+                holder.profileImage.setVisibility(View.VISIBLE);
+            } else if (messageDates.contains(position + 1)){
+                holder.profileImage.setVisibility(View.VISIBLE);
+            } else {
+                holder.profileImage.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            holder.profileImage.setVisibility(View.VISIBLE);
+        }
+
         String from_user = message.getFrom();
         String message_type = message.getType();
 
@@ -174,6 +197,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     class MessageViewHolder extends RecyclerView.ViewHolder {
 
+        private ConstraintLayout messageBubble;
         private TextView displayName, messageTime;
         private EmojiconTextView messageView;
         private CircleImageView profileImage;
@@ -182,6 +206,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         MessageViewHolder(View v) {
             super(v);
+            messageBubble = v.findViewById(R.id.message_bubble);
             messageView = v.findViewById(R.id.message_text_layout);
             profileImage = v.findViewById(R.id.message_profile_picture);
             displayName = v.findViewById(R.id.name_text_layout);

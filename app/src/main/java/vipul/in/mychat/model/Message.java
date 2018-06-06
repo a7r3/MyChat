@@ -17,12 +17,21 @@ public class Message {
     // Type of the message
     // Currently only "text" (Standard Text) is supported
     private String type;
+    private boolean isLastMessage = false;
 
     public Message(String message, long time, String from) {
         this.message = message;
         this.time = time;
         this.from = from;
         this.type = "text";
+    }
+
+    public void setLastMessage(boolean lastMessage) {
+        isLastMessage = lastMessage;
+    }
+
+    public boolean isLastMessage() {
+        return isLastMessage;
     }
 
     public Message() {

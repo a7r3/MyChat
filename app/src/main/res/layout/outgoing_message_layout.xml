@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:clipToPadding="false"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:paddingRight="8dp"
+    android:paddingLeft="8dp">
 
     <include
         android:id="@+id/start_of_day_view"
@@ -13,20 +14,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginTop="4dp"
         android:visibility="gone" />
 
     <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/outgoing_message_bubble"
+        android:id="@+id/message_bubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/start_of_day_view"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="48dp"
-        android:layout_marginTop="4dp"
         android:layout_toStartOf="@id/message_profile_picture"
         android:background="@drawable/outgoing_card"
+        android:layout_marginBottom="4dp"
         android:elevation="@dimen/cardview_default_elevation"
         android:minWidth="104dp"
         android:padding="8dp">
@@ -75,7 +76,7 @@
         android:id="@+id/message_profile_picture"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:layout_alignBottom="@id/outgoing_message_bubble"
+        android:layout_alignBottom="@id/message_bubble"
         android:layout_alignParentEnd="true"
         android:background="@drawable/round"
         android:src="@drawable/ic_person_black_24dp" />
