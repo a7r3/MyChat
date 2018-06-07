@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +37,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     private List<Message> messageList;
     private String myThumb, friendThumb;
     private String latestDate = null;
+    private RecyclerView recyclerView;
+
+    public boolean isSendButtonUsed = false;
+
     // Contains a list of positions of message
     // These messages indicate the start of a day
     // At these positions, the 'Date View' is made visible
@@ -71,6 +74,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // Use the formatter to get the Date, with the format specified earlier
         String date = dateFormat.format(calendar.getTime());
+
+        if(isSendButtonUsed) {
+            if(messageList.get(getItemCount() - 1).getFrom().equals(message.getFrom())) {
+                recyclerView
+                        .findViewHolderForAdapterPosition(getItemCount() - 1)
+                        .itemView
+                        .findViewById(R.id.message_profile_picture)
+                        .setVisibility(View.INVISIBLE);
+            }
+        }
 
         // Add the message as usual
         messageList.add(message);
@@ -112,6 +125,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void setHasStableIds(boolean hasStableIds) {
         super.setHasStableIds(true);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -160,19 +179,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.displayName.setText(from_user);
 
-        if (from_user.equals("Me")) {
-            if ("default".equals(myThumb)) {
-                holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
-            } else {
-                Picasso.get().load(Uri.parse(myThumb)).into(holder.profileImage);
-            }
-        } else {
-            if ("default".equals(friendThumb)) {
-                holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
-            } else {
-                holder.profileImage.setImageURI(Uri.parse(friendThumb));
-            }
-        }
+        Uri profileImageUri = Uri.parse(myThumb);
+        if(!from_user.equals("Me"))
+            profileImageUri = Uri.parse(friendThumb);
+
+        Picasso.get()
+                .load(profileImageUri)
+                .error(R.drawable.ic_person_black_24dp)
+                .placeholder(R.drawable.ic_person_black_24dp)
+                .into(holder.profileImage);
 
         // TODO: Support other media types
         if (message_type.equals("text")) {

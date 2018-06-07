@@ -434,7 +434,9 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 } else {
                     messages.setFrom(getExtra);
                 }
+
                 messageAdapter.addMessage(messages);
+
                 chatRecyclerView.scrollToPosition(msgList.size() - 1);
             }
 
@@ -469,6 +471,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
      * Message Details : Content, Seen (Indicator), Type (Text/Media), Time at which message was sent
      */
     private void sendMessage() {
+
+        messageAdapter.isSendButtonUsed = true;
 
         // Get the message from the Input Bar
         String msg = editText.getText().toString();
@@ -527,6 +531,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError != null) {
                     Log.e(TAG, "sendMessage : " + databaseError.getMessage());
+                    return;
                 }
             }
         });
