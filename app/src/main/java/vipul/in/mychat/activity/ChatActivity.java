@@ -41,6 +41,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +80,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     private CircleImageView chatProfileImage;
     private String receiverUid;
     private boolean typingStarted;
-    private DatabaseReference mRef, rootDatabaseReference;
+    private DatabaseReference mRef, rootDatabaseReference, myReference;
     private View profileBottomSheetView;
     private CircleImageView profileBottomSheetImage;
     private TextView profileBottomSheetName;
@@ -88,45 +91,48 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     protected void onStart() {
-        Log.d(TAG, "Activity onStart");
+        Log.d("WAAHChat", "Activity onStart");
         super.onStart();
 
         senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         receiverUid = getIntent().getStringExtra("uid");
 
-        DatabaseReference myReference = FirebaseDatabase.getInstance().getReference();
+        myReference = FirebaseDatabase.getInstance().getReference();
 
-        myReference.child("Users").child(senderUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                myThumb = dataSnapshot.getValue(String.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        myReference.keepSynced(true);
 
 
-        myReference.child("Users").child(receiverUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                friendThumb = dataSnapshot.getValue(String.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+//        myReference.child("Users").child(senderUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                myThumb = dataSnapshot.getValue(String.class);
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//
+//
+//        myReference.child("Users").child(receiverUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                friendThumb = dataSnapshot.getValue(String.class);
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
 
         FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("isOnline").setValue("true");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("OnCreate", "OnClick");
+        Log.d("WAAHChat", "OnCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
@@ -137,7 +143,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         myThumb = sharedPreferences.getString("thumb_pic", "default");
         friendThumb = getIntent().getStringExtra("friendThumb");
 
-        Log.d("THUMBS", myThumb + " " + friendThumb);
+        Log.d("THUMBS:-", myThumb.equals(friendThumb) ? "1" : "0");
 
 
         receiverUid = getIntent().getStringExtra("uid");
@@ -208,8 +214,11 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         rootDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
+        rootDatabaseReference.keepSynced(true);
+
         getExtra = getIntent().getStringExtra("clicked");
         userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
+        userDatabaseReference.keepSynced(true);
 
         chat_toolbar = findViewById(R.id.chat_toolbar);
         setSupportActionBar(chat_toolbar);
@@ -224,7 +233,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         View chatCustomToolbar = LayoutInflater.from(this).inflate(R.layout.chat_app_bar, null);
         chatProfileImage = chatCustomToolbar.findViewById(R.id.chatProfilePicture);
 
-        FirebaseDatabase.getInstance().getReference().child("Users").child(receiverUid).addValueEventListener(new ValueEventListener() {
+        userDatabaseReference.child(receiverUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String name = dataSnapshot.child("name").getValue().toString();
@@ -235,12 +244,46 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 profileBottomSheetStatus.setText(status);
 
                 sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-                if (!getIntent().getStringExtra("friendProfilePic").equals("default") || !getIntent().getStringExtra("friendProfilePic").equals("null")) {
-                    //Uri imageUri = Uri.parse(image);
-                    //Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
-                    profileBottomSheetImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendProfilePic")));
-                    chatProfileImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendThumb")));
-                    //Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(chatProfileImage);
+                if (!image.equals("default")) {
+                    final Uri imageUri = Uri.parse(image);
+                    Picasso.with(ChatActivity.this)
+                            .load(imageUri)
+                            .placeholder(R.drawable.ic_person_black_24dp)
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(profileBottomSheetImage, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    Picasso.with(ChatActivity.this)
+                                            .load(imageUri)
+                                            .placeholder(R.drawable.ic_person_black_24dp)
+                                            .into(profileBottomSheetImage);
+                                }
+                            });
+                    //profileBottomSheetImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendProfilePic")));
+                    //chatProfileImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendThumb")));
+                    Picasso.with(ChatActivity.this)
+                            .load(imageUri)
+                            .placeholder(R.drawable.ic_person_black_24dp)
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(chatProfileImage, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    Picasso.with(ChatActivity.this)
+                                            .load(imageUri)
+                                            .placeholder(R.drawable.ic_person_black_24dp)
+                                            .into(chatProfileImage);
+                                }
+                            });
                 } else {
                     profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
                 }
@@ -287,7 +330,9 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
-        mRef = FirebaseDatabase.getInstance().getReference().child("Chats").child(senderUid).child(receiverUid).child("typing");
+        mRef = rootDatabaseReference.child("Chats").child(senderUid).child(receiverUid).child("typing");
+        mRef.keepSynced(true);
+
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -344,13 +389,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
                 ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
-
-                if (!getSharedPreferences("picInfoLocal", MODE_PRIVATE).getString(receiverUid, "null").equals("default") || !getSharedPreferences("picInfoLocal", MODE_PRIVATE).getString(receiverUid, "null").equals("null")) {
-                    imageView.setImageURI(Uri.parse(getSharedPreferences("picInfoLocal", MODE_PRIVATE).getString(receiverUid, "default")));
-
-                } else {
-                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
-                }
+                imageView.setImageDrawable(profileBottomSheetImage.getDrawable());
 
                 imgDialog.show();
                 //Toast.makeText(ChatActivity.this, "ImageViewer coming soon :P", Toast.LENGTH_LONG).show();
@@ -541,7 +580,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     public void watchLastSeen() {
 
         if (!friendTyping) {
-            mRef = FirebaseDatabase.getInstance().getReference().child("Users").child(receiverUid);
+            mRef = userDatabaseReference.child(receiverUid);
             mRef.child("isOnline").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -591,14 +630,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     protected void onPause() {
         super.onPause();
         mRewardedVideoAd.pause(this);
-        senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("isOnline").setValue("false");
-        FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("lastSeen").setValue(ServerValue.TIMESTAMP);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
         senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("isOnline").setValue("false");
         FirebaseDatabase.getInstance().getReference().child("Users").child(senderUid).child("lastSeen").setValue(ServerValue.TIMESTAMP);

@@ -238,6 +238,7 @@ public class OnboardActivity extends AppCompatActivity {
             Log.d(TAG, "USER IS NOTNULL");
             FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("true");
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference().child("Users");
+            mRef.keepSynced(true);
 
             SharedPreferences sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -334,6 +335,7 @@ public class OnboardActivity extends AppCompatActivity {
                     case ASK_USER_NAME:
                         // Set the username in the Database
                         databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid());
+                        databaseReference.keepSynced(true);
                         databaseReference.child("name").setValue(inputBox.getText().toString());
                         // Send this username as a message in the user context
                         sendMessageAsUser(inputBox.getText().toString());

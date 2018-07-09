@@ -1,14 +1,12 @@
 package vipul.in.mychat.fragment;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
+
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -52,14 +50,8 @@ import vipul.in.mychat.model.User;
 
 public class ContactsFragment extends Fragment {
 
-    SharedPreferences sharedPreferencesThumb;
-    SharedPreferences.Editor editorThumb;
-    SharedPreferences sharedPreferencesPic;
-    SharedPreferences.Editor editorPic;
-    SharedPreferences sharedPreferencesThumbLive;
-    SharedPreferences.Editor editorThumbLive;
-    SharedPreferences sharedPreferencesPicLive;
-    SharedPreferences.Editor editorPicLive;
+    DatabaseReference friendsDatabase;
+
     private DatabaseReference userDatabaseReference;
     private ContactsAdapter adapter;
     private List<User> userList;
@@ -120,7 +112,9 @@ public class ContactsFragment extends Fragment {
                 userList.add(contact);
                 adapter.notifyItemInserted(userList.size() - 1);
                 final String friendUid = dataSnapshot.getKey();
-                FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(friendUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                friendsDatabase = FirebaseDatabase.getInstance().getReference().child("Friends");
+                friendsDatabase.keepSynced(true);
+                friendsDatabase.child(currUid).child(friendUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot ds) {
                         if (!ds.exists()) {
@@ -133,7 +127,6 @@ public class ContactsFragment extends Fragment {
 
                     }
                 });
-                saveProfilePictures(contact);
             }
 
             @Override
@@ -176,103 +169,103 @@ public class ContactsFragment extends Fragment {
      *
      * @param contact The User whose profile picture has to be saved
      */
-    public void saveProfilePictures(User contact) {
-        if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("null")) {
-            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
-            editorThumbLive.apply();
-
-            if (contact.getThumb_pic().equals("default")) {
-                editorThumb.putString(contact.getUid(), "default");
-                editorThumb.apply();
-            } else {
-                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
-                File thumbDir = new File(thumbPath);
-                if (!thumbDir.exists()) {
-                    thumbDir.mkdirs();
-                }
-                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
-                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
-
-                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
-                editorThumb.apply();
-
-            }
-
-        } else if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("default")) {
-            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
-            editorThumbLive.apply();
-
-            editorThumb.putString(contact.getUid(), "default");
-            editorThumb.apply();
-        } else if (!sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals(contact.getThumb_pic())) {
-            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
-            editorThumbLive.apply();
-
-            if (contact.getThumb_pic().equals("default")) {
-                editorThumb.putString(contact.getUid(), "default");
-                editorThumb.apply();
-            } else {
-
-                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
-                File thumbDir = new File(thumbPath);
-                if (!thumbDir.exists()) {
-                    thumbDir.mkdirs();
-                }
-                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
-                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
-
-                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
-                editorThumb.apply();
-            }
-
-        }
-
-        if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("null")) {
-            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
-            editorPicLive.apply();
-
-            if (contact.getProfile_pic().equals("default")) {
-                editorPic.putString(contact.getUid(), "default");
-                editorPic.apply();
-            } else {
-                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
-                File picDir = new File(picPath);
-                if (!picDir.exists()) {
-                    picDir.mkdirs();
-                }
-                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
-                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
-
-                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
-                editorPic.apply();
-            }
-        } else if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("default")) {
-            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
-            editorPicLive.apply();
-
-            editorPic.putString(contact.getUid(), "default");
-            editorPic.apply();
-        } else if (!sharedPreferencesPicLive.getString(contact.getUid(), "null").equals(contact.getProfile_pic())) {
-            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
-            editorPicLive.apply();
-
-            if (contact.getProfile_pic().equals("default")) {
-                editorPic.putString(contact.getUid(), "default");
-                editorPic.apply();
-            } else {
-                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
-                File picDir = new File(picPath);
-                if (!picDir.exists()) {
-                    picDir.mkdirs();
-                }
-                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
-                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
-
-                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
-                editorPic.apply();
-            }
-        }
-    }
+//    public void saveProfilePictures(User contact) {
+//        if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("null")) {
+//            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
+//            editorThumbLive.apply();
+//
+//            if (contact.getThumb_pic().equals("default")) {
+//                editorThumb.putString(contact.getUid(), "default");
+//                editorThumb.apply();
+//            } else {
+//                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
+//                File thumbDir = new File(thumbPath);
+//                if (!thumbDir.exists()) {
+//                    thumbDir.mkdirs();
+//                }
+//                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
+//                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
+//
+//                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
+//                editorThumb.apply();
+//
+//            }
+//
+//        } else if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("default")) {
+//            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
+//            editorThumbLive.apply();
+//
+//            editorThumb.putString(contact.getUid(), "default");
+//            editorThumb.apply();
+//        } else if (!sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals(contact.getThumb_pic())) {
+//            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
+//            editorThumbLive.apply();
+//
+//            if (contact.getThumb_pic().equals("default")) {
+//                editorThumb.putString(contact.getUid(), "default");
+//                editorThumb.apply();
+//            } else {
+//
+//                String thumbPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/thumbnails";
+//                File thumbDir = new File(thumbPath);
+//                if (!thumbDir.exists()) {
+//                    thumbDir.mkdirs();
+//                }
+//                File thumb_pic_local = new File(thumbPath, contact.getUid() + ".jpeg");
+//                new SaveFile(contact.getThumb_pic(), thumb_pic_local).execute();
+//
+//                editorThumb.putString(contact.getUid(), Uri.fromFile(thumb_pic_local).toString());
+//                editorThumb.apply();
+//            }
+//
+//        }
+//
+//        if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("null")) {
+//            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
+//            editorPicLive.apply();
+//
+//            if (contact.getProfile_pic().equals("default")) {
+//                editorPic.putString(contact.getUid(), "default");
+//                editorPic.apply();
+//            } else {
+//                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
+//                File picDir = new File(picPath);
+//                if (!picDir.exists()) {
+//                    picDir.mkdirs();
+//                }
+//                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
+//                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
+//
+//                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
+//                editorPic.apply();
+//            }
+//        } else if (sharedPreferencesPicLive.getString(contact.getUid(), "null").equals("default")) {
+//            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
+//            editorPicLive.apply();
+//
+//            editorPic.putString(contact.getUid(), "default");
+//            editorPic.apply();
+//        } else if (!sharedPreferencesPicLive.getString(contact.getUid(), "null").equals(contact.getProfile_pic())) {
+//            editorPicLive.putString(contact.getUid(), contact.getProfile_pic());
+//            editorPicLive.apply();
+//
+//            if (contact.getProfile_pic().equals("default")) {
+//                editorPic.putString(contact.getUid(), "default");
+//                editorPic.apply();
+//            } else {
+//                String picPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MyChat/profile_pics";
+//                File picDir = new File(picPath);
+//                if (!picDir.exists()) {
+//                    picDir.mkdirs();
+//                }
+//                File profile_pic_local = new File(picPath, contact.getUid() + ".jpeg");
+//                new SaveFile(contact.getProfile_pic(), profile_pic_local).execute();
+//
+//                editorPic.putString(contact.getUid(), Uri.fromFile(profile_pic_local).toString());
+//                editorPic.apply();
+//            }
+//        }
+//    }
 
     @Override
     public void onStart() {
@@ -287,18 +280,6 @@ public class ContactsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
 
         userList = new ArrayList<>();
-
-        sharedPreferencesThumb = getContext().getSharedPreferences("thumbInfoLocal", Context.MODE_PRIVATE);
-        editorThumb = sharedPreferencesThumb.edit();
-
-        sharedPreferencesPic = getContext().getSharedPreferences("picInfoLocal", Context.MODE_PRIVATE);
-        editorPic = sharedPreferencesPic.edit();
-
-        sharedPreferencesThumbLive = getContext().getSharedPreferences("thumbInfoLive", Context.MODE_PRIVATE);
-        editorThumbLive = sharedPreferencesThumbLive.edit();
-
-        sharedPreferencesPicLive = getContext().getSharedPreferences("picInfoLive", Context.MODE_PRIVATE);
-        editorPicLive = sharedPreferencesPicLive.edit();
 
         adapter = new ContactsAdapter(getActivity(), rootView.getContext(), userList);
 

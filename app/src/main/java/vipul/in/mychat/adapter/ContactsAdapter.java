@@ -14,13 +14,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
-import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
@@ -57,12 +58,21 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
-        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", context);
 
         if ("default".equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
-            Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
+            Picasso.with(context).load(Uri.parse(contacts.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onError() {
+                    Picasso.with(context).load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
+                }
+            });
         }
 
         holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
@@ -71,10 +81,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
                 Intent intent = new Intent(activity, ChatActivity.class);
                 intent.putExtra("clicked", holder.name_from.getText().toString());
                 intent.putExtra("uid", contacts.getUid());
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", context);
-                intent.putExtra("friendThumb", sharedPreferenceManager.getData(contacts.getUid()));
-                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", context);
-                intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(contacts.getUid()));
+                intent.putExtra("friendThumb", contacts.getThumb_pic());
+                intent.putExtra("friendProfilePic", contacts.getProfile_pic());
                 Log.d("Key", "Key: " + contacts.getUid());
                 activity.startActivity(intent);
             }
@@ -84,12 +92,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             @Override
             public void onClick(View v) {
                 Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", context);
-                String profile_picture = sharedPreferenceManager.getData(contacts.getUid());
-                if ("default".equals(profile_picture)) {
+                if ("default".equals(contacts.getProfile_pic())) {
                     imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
                 } else {
-                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, profile_picture);
+                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, contacts.getProfile_pic());
                 }
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, contacts.getName());
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, contacts.getUid());

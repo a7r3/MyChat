@@ -40,6 +40,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 
@@ -161,13 +163,25 @@ public class MainActivity extends AppCompatActivity {
                         , null);
                 imgDialog.setContentView(myView);
 
-                ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
+                final ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
                 if ("default".equals(sharedPreferences.getString("profile_pic", "default"))) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
-
                 } else {
-                    Picasso.get().load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
+                    Picasso.with(MainActivity.this)
+                            .load(sharedPreferences.getString("profile_pic", "default"))
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(imageView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    Picasso.with(MainActivity.this).load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
+                                }
+                            });
                 }
                 imgDialog.show();
             }
@@ -178,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
         final String curr_uid = user.getUid();
 
         databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(curr_uid);
+        databaseReference.keepSynced(true);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -191,11 +206,47 @@ public class MainActivity extends AppCompatActivity {
                 profileBottomSheetStatus.setText(status);
 
                 if (!image.equals("default")) {
-                    Uri imageUri = Uri.parse(sharedPreferences.getString("profile_pic", "default"));
-                    Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileBottomSheetImage);
-                    Picasso.get().load(imageUri).placeholder(R.drawable.ic_person_black_24dp).into(profileView);
+                    final Uri imageUri = Uri.parse(sharedPreferences.getString("profile_pic", "default"));
+                    Picasso.with(MainActivity.this)
+                            .load(imageUri)
+                            .placeholder(R.drawable.ic_person_black_24dp)
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(profileBottomSheetImage, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    Picasso.with(MainActivity.this)
+                                            .load(imageUri)
+                                            .placeholder(R.drawable.ic_person_black_24dp)
+                                            .into(profileBottomSheetImage);
+                                }
+                            });
+
+                    Picasso.with(MainActivity.this)
+                            .load(imageUri)
+                            .placeholder(R.drawable.ic_person_black_24dp)
+                            .networkPolicy(NetworkPolicy.OFFLINE)
+                            .into(profileView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError() {
+                                    Picasso.with(MainActivity.this)
+                                            .load(imageUri)
+                                            .placeholder(R.drawable.ic_person_black_24dp)
+                                            .into(profileView);
+                                }
+                            });
                 } else {
                     profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
+                    profileView.setImageResource(R.drawable.ic_person_black_24dp);
                 }
             }
 
@@ -303,6 +354,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == GALLERY_PICK && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
 
+            Log.d("image_uri",imageUri.toString());
+
+
             CropImage.activity(imageUri)
                     .setAspectRatio(1, 1)
                     .setMinCropWindowSize(500, 500)
@@ -326,6 +380,8 @@ public class MainActivity extends AppCompatActivity {
                 mProgressDialog.show();
 
                 Uri resultUri = result.getUri();
+
+                Log.d("image_uri",resultUri.toString());
 
                 File thumb_filePath = new File(resultUri.getPath());
 
@@ -373,8 +429,10 @@ public class MainActivity extends AppCompatActivity {
 
                                                     editor.putString("profile_pic", download_url);
                                                     editor.putString("thumb_pic", thumb_downloadUrl);
+                                                    editor.apply();
 
-                                                    Picasso.get().load(Uri.parse(download_url)).into(profileBottomSheetImage);
+                                                    Picasso.with(MainActivity.this).load(Uri.parse(download_url)).into(profileBottomSheetImage);
+                                                    Picasso.with(MainActivity.this).load(Uri.parse(download_url)).into(profileView);
                                                     //Toast.makeText(getParentFragment().getContext(), "Success Uploading.", Toast.LENGTH_LONG).show();
                                                 }
                                             }
@@ -395,15 +453,6 @@ public class MainActivity extends AppCompatActivity {
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 Exception error = result.getError();
             }
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (currentUser != null) {
-            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("false");
-            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
         }
     }
 }

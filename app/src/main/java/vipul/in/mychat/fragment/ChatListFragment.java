@@ -72,56 +72,6 @@ public class ChatListFragment extends Fragment {
         chatListRecycler.setLayoutManager(linearLayoutManager);
         chatListRecycler.setAdapter(chatListAdapter);
 
-        //fetch_chats();
-
-
-//        FirebaseDatabase.getInstance().getReference().child("Users").addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//                User newChat = dataSnapshot.getValue(User.class);
-//                ListIterator<User> listIterator = chatList.listIterator();
-//
-//                int tempFlag = 0;
-//                while (listIterator.hasNext()) {
-//                    if (listIterator.next().getPhoneNum().equals(dataSnapshot.child("phoneNum").getValue(String.class))) {
-//                        int index = listIterator.nextIndex();
-//                        newChat.setTimestamp(chatList.get(index - 1).getTimestamp());
-//                        newChat.setLastMessage(chatList.get(index - 1).getLastMessage());
-//                        newChat.setSeen(chatList.get(index - 1).isSeen());
-//                        newChat.setUid(chatList.get(index - 1).getUid());
-//                        newChat.setName(chatList.get(index - 1).getName());
-//                        chatList.remove(index - 1);
-//                        chatList.add(index - 1, newChat);
-//                        tempFlag = 1;
-//                    }
-//                    if (tempFlag == 1) {
-//                        chatListAdapter.notifyDataSetChanged();
-//                        break;
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
 
         Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
         HashMap<String, String> hm = new HashMap<String, String>();
@@ -140,6 +90,7 @@ public class ChatListFragment extends Fragment {
         phones.close();
 
         mRef = FirebaseDatabase.getInstance().getReference();
+        mRef.keepSynced(true);
 
         mRef.child("Chats").child(currUid).orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
 
@@ -151,7 +102,7 @@ public class ChatListFragment extends Fragment {
 
                 singleChatAdd.setUid(uid);
 
-                FirebaseDatabase.getInstance().getReference().child("Users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                mRef.child("Users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot ds) {
                         String phoneNum = ds.child("phoneNum").getValue(String.class);

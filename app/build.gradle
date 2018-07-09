@@ -51,7 +51,9 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
 
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.+'
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'id.zelory:compressor:2.1.0'
     implementation 'com.hbb20:ccp:2.2.0'

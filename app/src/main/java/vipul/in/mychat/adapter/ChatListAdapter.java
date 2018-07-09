@@ -21,13 +21,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
-import vipul.in.mychat.SharedPreferenceManager;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
@@ -70,9 +71,18 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         if ("default".equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
-            Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
-        }
+            Picasso.with(mContext).load(Uri.parse(singleChat.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
+                @Override
+                public void onSuccess() {
 
+                }
+
+                @Override
+                public void onError() {
+                    Picasso.with(mContext).load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
+                }
+            });
+        }
 
         if ("true".equals(singleChat.getIsOnline())) {
             holder.onlineIndicator.setImageResource(R.drawable.online);
@@ -84,12 +94,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             @Override
             public void onClick(View v) {
                 Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
-                String profile_picture = sharedPreferenceManager.getData(singleChat.getUid());
-                if ("default".equals(profile_picture)) {
+                if ("default".equals(singleChat.getProfile_pic())) {
                     imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
                 } else {
-                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, profile_picture);
+                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, singleChat.getProfile_pic());
                 }
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, singleChat.getName());
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, singleChat.getUid());
@@ -128,10 +136,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
                         Intent intent = new Intent(activity, ChatActivity.class);
                         intent.putExtra("clicked", singleChat.getName());
                         intent.putExtra("uid", singleChat.getUid());
-                        SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", mContext);
-                        intent.putExtra("friendThumb", sharedPreferenceManager.getData(singleChat.getUid()));
-                        sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", mContext);
-                        intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(singleChat.getUid()));
+                        intent.putExtra("friendThumb", singleChat.getThumb_pic());
+                        intent.putExtra("friendProfilePic", singleChat.getProfile_pic());
                         activity.startActivity(intent);
                     }
 

@@ -13,10 +13,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import vipul.in.mychat.R;
-import vipul.in.mychat.SharedPreferenceManager;
 
 public class ImageDialogActivity extends AppCompatActivity {
 
@@ -46,7 +46,7 @@ public class ImageDialogActivity extends AppCompatActivity {
 
         final String receiverUid = getIntent().getStringExtra(CHAT_UID_EXTRA);
         final String chatName = getIntent().getStringExtra(CHAT_NAME_EXTRA);
-        String imageUri = getIntent().getStringExtra(IMAGE_URI_EXTRA);
+        final String imageUri = getIntent().getStringExtra(IMAGE_URI_EXTRA);
 
         imageDialogRedirectChat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,24 +54,36 @@ public class ImageDialogActivity extends AppCompatActivity {
                 Intent intent = new Intent(ImageDialogActivity.this, ChatActivity.class);
                 intent.putExtra("clicked", chatName);
                 intent.putExtra("uid", receiverUid);
-                SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager("thumbInfoLocal", ImageDialogActivity.this);
-                intent.putExtra("friendThumb", sharedPreferenceManager.getData(receiverUid));
-                sharedPreferenceManager = new SharedPreferenceManager("picInfoLocal", ImageDialogActivity.this);
-                intent.putExtra("friendProfilePic", sharedPreferenceManager.getData(receiverUid));
+                intent.putExtra("friendThumb", imageUri);
+                intent.putExtra("friendProfilePic", imageUri);
                 ImageDialogActivity.this.startActivity(intent);
             }
         });
 
         imageDialogChatName.setText(chatName);
 
-        Picasso.get().load(Uri.parse(imageUri)).placeholder(R.drawable.ic_person_black_24dp).into(imageDialogProfilePicture, new Callback() {
+        Picasso.with(ImageDialogActivity.this).load(Uri.parse(imageUri))
+                .placeholder(R.drawable.ic_person_black_24dp)
+                .networkPolicy(NetworkPolicy.OFFLINE)
+                .into(imageDialogProfilePicture, new Callback() {
             @Override
             public void onSuccess() {
                 startPostponedEnterTransition();
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onError() {
+                Picasso.with(ImageDialogActivity.this).load(Uri.parse(imageUri)).placeholder(R.drawable.ic_person_black_24dp).into(imageDialogProfilePicture, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        startPostponedEnterTransition();
+                    }
+
+                    @Override
+                    public void onError() {
+
+                    }
+                });
             }
         });
 

@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
@@ -78,7 +80,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if(isSendButtonUsed) {
             if(messageList.get(getItemCount() - 1).getFrom().equals(message.getFrom())) {
                 recyclerView
-                        .findViewHolderForAdapterPosition(getItemCount() - 1)
+                        .findViewHolderForAdapterPosition(getItemCount() - 1)       //throwing NPE
                         .itemView
                         .findViewById(R.id.message_profile_picture)
                         .setVisibility(View.INVISIBLE);
@@ -134,7 +136,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MessageViewHolder holder, int position) {
 
         Message message = messageList.get(position);
 
@@ -179,15 +181,64 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         holder.displayName.setText(from_user);
 
-        Uri profileImageUri = Uri.parse(myThumb);
-        if(!from_user.equals("Me"))
-            profileImageUri = Uri.parse(friendThumb);
 
-        Picasso.get()
-                .load(profileImageUri)
-                .error(R.drawable.ic_person_black_24dp)
-                .placeholder(R.drawable.ic_person_black_24dp)
-                .into(holder.profileImage);
+        if(!from_user.equals("Me")) {
+
+            if (friendThumb.equals("default")) {
+                holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
+            } else {
+                final Uri profileImageUri = Uri.parse(friendThumb);
+                Picasso.with(context)
+                        .load(profileImageUri)
+                        .error(R.drawable.ic_person_black_24dp)
+                        .placeholder(R.drawable.ic_person_black_24dp)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(holder.profileImage, new Callback() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError() {
+                                Picasso.with(context)
+                                        .load(profileImageUri)
+                                        .error(R.drawable.ic_person_black_24dp)
+                                        .placeholder(R.drawable.ic_person_black_24dp)
+                                        .into(holder.profileImage);
+                            }
+                        });
+            }
+        }
+        else {
+            if(myThumb.equals("default")) {
+                holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
+            }
+            else {
+                final Uri profileImageUri = Uri.parse(myThumb);
+                Picasso.with(context)
+                        .load(profileImageUri)
+                        .error(R.drawable.ic_person_black_24dp)
+                        .placeholder(R.drawable.ic_person_black_24dp)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(holder.profileImage, new Callback() {
+                            @Override
+                            public void onSuccess() {
+
+                            }
+
+                            @Override
+                            public void onError() {
+                                Picasso.with(context)
+                                        .load(profileImageUri)
+                                        .error(R.drawable.ic_person_black_24dp)
+                                        .placeholder(R.drawable.ic_person_black_24dp)
+                                        .into(holder.profileImage);
+                            }
+                        });
+            }
+        }
+
 
         // TODO: Support other media types
         if (message_type.equals("text")) {
