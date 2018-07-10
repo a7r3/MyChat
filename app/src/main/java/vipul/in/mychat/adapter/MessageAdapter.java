@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -138,7 +139,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(@NonNull final MessageViewHolder holder, int position) {
 
-        Message message = messageList.get(position);
+        final Message message = messageList.get(position);
 
         String currentMessageUser = messageList.get(position).getFrom();
 
@@ -178,8 +179,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         String time = dateFormat.format(calendar.getTime());
         holder.messageTime.setText(time);
-
-        holder.displayName.setText(from_user);
 
 
         if(!from_user.equals("Me")) {
@@ -244,6 +243,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         if (message_type.equals("text")) {
             holder.messageView.setText(message.getMessage());
         }
+        else if (message_type.equals("image")) {
+            holder.messageView.setVisibility(View.GONE);
+            holder.imageSentLayout.setVisibility(View.VISIBLE);
+            Picasso.with(context)
+                    .load(Uri.parse(message.getMessage()))
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .placeholder(R.drawable.ic_person_black_24dp)
+                    .into(holder.imageSentLayout, new Callback() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onError() {
+                            Picasso.with(context)
+                                    .load(Uri.parse(message.getMessage()))
+                                    .placeholder(R.drawable.ic_person_black_24dp)
+                                    .into(holder.imageSentLayout);
+                        }
+                    });
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,10 +285,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     class MessageViewHolder extends RecyclerView.ViewHolder {
 
         private ConstraintLayout messageBubble;
-        private TextView displayName, messageTime;
+        private TextView messageTime;
         private EmojiconTextView messageView;
         private CircleImageView profileImage;
         private View dateView;
+        private ImageView imageSentLayout;
         private TextView dateText;
 
         MessageViewHolder(View v) {
@@ -275,7 +297,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             messageBubble = v.findViewById(R.id.message_bubble);
             messageView = v.findViewById(R.id.message_text_layout);
             profileImage = v.findViewById(R.id.message_profile_picture);
-            displayName = v.findViewById(R.id.name_text_layout);
+            imageSentLayout = v.findViewById(R.id.image_send_layout);
             messageTime = v.findViewById(R.id.time_text_layout);
             dateView = v.findViewById(R.id.start_of_day_view);
             dateText = dateView.findViewById(R.id.date_text);

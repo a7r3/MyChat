@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -33,6 +34,8 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -41,6 +44,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -89,6 +95,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     private ImageView statusEditorButton;
     private BottomSheetDialog profileBottomSheetDialog;
 
+    ImageButton sendAttach;
+
     @Override
     protected void onStart() {
         Log.d("WAAHChat", "Activity onStart");
@@ -100,7 +108,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         myReference = FirebaseDatabase.getInstance().getReference();
 
         myReference.keepSynced(true);
-
 
 //        myReference.child("Users").child(senderUid).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
 //            @Override
@@ -139,6 +146,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         initializeAd();
 
         sharedPreferences = getSharedPreferences("userInfo", MODE_PRIVATE);
+
+        sendAttach = findViewById(R.id.attachButton);
 
         myThumb = sharedPreferences.getString("thumb_pic", "default");
         friendThumb = getIntent().getStringExtra("friendThumb");
@@ -311,6 +320,17 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 Log.d("Hey", "Hey");
             }
         });
+
+        sendAttach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent galleryIntent = new Intent();
+                galleryIntent.setType("image/*");
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(galleryIntent, "Select a Profile Picture"), 55);
+            }
+        });
+
 
         receiverName = findViewById(R.id.chatPersonName);
         receiverLastSeen = findViewById(R.id.chatLastSeen);
@@ -574,6 +594,70 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 }
             }
         });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == 55 && resultCode == RESULT_OK) {
+            Uri imageUri = data.getData();
+            final String senderMessageReference = "Messages/" + senderUid + "/" + receiverUid;
+            final String receiverMessageReference = "Messages/" + receiverUid + "/" + senderUid;
+
+            DatabaseReference user_message_push = rootDatabaseReference.child("Messages").child(senderUid).child(receiverUid).push();
+
+            final String pushId = user_message_push.getKey();
+
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("message_images").child(pushId+".jpg");
+
+            storageReference.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if(task.isSuccessful()) {
+                        String download_url = task.getResult().getDownloadUrl().toString();
+
+                        HashMap<String, Object> messageMap = new HashMap<>();
+                        messageMap.put("message", download_url);
+                        messageMap.put("seen", false);
+                        messageMap.put("type", "image");
+                        messageMap.put("time", ServerValue.TIMESTAMP);
+                        messageMap.put("from", senderUid);
+
+                        HashMap<String, Object> messageUserMap = new HashMap<>();
+
+
+                        messageUserMap.put(senderMessageReference + "/" + pushId, messageMap);
+                        messageUserMap.put(receiverMessageReference + "/" + pushId, messageMap);
+
+                        rootDatabaseReference.child("Chats").child(senderUid).child(receiverUid).child("seen").setValue(true);
+                        // Set the latest message of this Chat as this message
+                        rootDatabaseReference.child("Chats").child(senderUid).child(receiverUid).child("lastMessage").setValue("Image");
+                        // Set the latest message's timestamp as this message's timestamp
+                        rootDatabaseReference.child("Chats").child(senderUid).child(receiverUid).child("timestamp").setValue(ServerValue.TIMESTAMP);
+
+                        // Until the Receiver doesn't see this message, set it to false
+                        rootDatabaseReference.child("Chats").child(receiverUid).child(senderUid).child("seen").setValue(false);
+                        // Set the latest message of this Chat as this message
+                        rootDatabaseReference.child("Chats").child(receiverUid).child(senderUid).child("lastMessage").setValue("Image");
+                        // Set the latest message's timestamp as this message's timestamp
+                        rootDatabaseReference.child("Chats").child(receiverUid).child(senderUid).child("timestamp").setValue(ServerValue.TIMESTAMP);
+
+                        // Update this 'Messages' node with the New Message
+                        rootDatabaseReference.updateChildren(messageUserMap, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                if (databaseError != null) {
+                                    Log.e(TAG, "sendMessage : " + databaseError.getMessage());
+                                    return;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
 
     }
 
