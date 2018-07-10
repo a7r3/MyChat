@@ -241,6 +241,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         // TODO: Support other media types
         if (message_type.equals("text")) {
+            holder.messageView.setVisibility(View.VISIBLE);
+            holder.imageSentLayout.setVisibility(View.GONE);
             holder.messageView.setText(message.getMessage());
         }
         else if (message_type.equals("image")) {
