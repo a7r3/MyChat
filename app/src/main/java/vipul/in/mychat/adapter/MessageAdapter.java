@@ -25,7 +25,8 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import vipul.in.mychat.R;
-import vipul.in.mychat.Utils;
+import vipul.in.mychat.util.Constants;
+import vipul.in.mychat.util.Utils;
 import vipul.in.mychat.model.Message;
 
 /**
@@ -183,11 +184,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         if(!from_user.equals("Me")) {
 
-            if (friendThumb.equals("default")) {
+            if (friendThumb.equals(Constants.DEFAULT_PROFILE_PICTURE)) {
                 holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
             } else {
                 final Uri profileImageUri = Uri.parse(friendThumb);
-                Picasso.with(context)
+                Picasso.get()
                         .load(profileImageUri)
                         .error(R.drawable.ic_person_black_24dp)
                         .placeholder(R.drawable.ic_person_black_24dp)
@@ -199,23 +200,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             }
 
                             @Override
-                            public void onError() {
-                                Picasso.with(context)
-                                        .load(profileImageUri)
-                                        .error(R.drawable.ic_person_black_24dp)
-                                        .placeholder(R.drawable.ic_person_black_24dp)
-                                        .into(holder.profileImage);
+                            public void onError(Exception e) {
                             }
                         });
             }
         }
         else {
-            if(myThumb.equals("default")) {
+            if(myThumb.equals(Constants.DEFAULT_PROFILE_PICTURE)) {
                 holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
             }
             else {
                 final Uri profileImageUri = Uri.parse(myThumb);
-                Picasso.with(context)
+                Picasso.get()
                         .load(profileImageUri)
                         .error(R.drawable.ic_person_black_24dp)
                         .placeholder(R.drawable.ic_person_black_24dp)
@@ -227,8 +223,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                             }
 
                             @Override
-                            public void onError() {
-                                Picasso.with(context)
+                            public void onError(Exception e) {
+                                Picasso.get()
                                         .load(profileImageUri)
                                         .error(R.drawable.ic_person_black_24dp)
                                         .placeholder(R.drawable.ic_person_black_24dp)
@@ -248,7 +244,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         else if (message_type.equals("image")) {
             holder.messageView.setVisibility(View.GONE);
             holder.imageSentLayout.setVisibility(View.VISIBLE);
-            Picasso.with(context)
+            Picasso.get()
                     .load(Uri.parse(message.getMessage()))
                     .networkPolicy(NetworkPolicy.OFFLINE)
                     .placeholder(R.drawable.ic_person_black_24dp)
@@ -259,8 +255,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         }
 
                         @Override
-                        public void onError() {
-                            Picasso.with(context)
+                        public void onError(Exception e) {
+                            Picasso.get()
                                     .load(Uri.parse(message.getMessage()))
                                     .placeholder(R.drawable.ic_person_black_24dp)
                                     .into(holder.imageSentLayout);

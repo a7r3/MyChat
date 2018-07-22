@@ -1,4 +1,4 @@
-package vipul.in.mychat;
+package vipul.in.mychat.util;
 
 import android.content.Context;
 import android.content.res.Resources;

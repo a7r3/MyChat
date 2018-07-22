@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,7 +33,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import vipul.in.mychat.MarginDividerItemDecoration;
+import vipul.in.mychat.util.Constants;
+import vipul.in.mychat.util.MarginDividerItemDecoration;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ChatListAdapter;
 import vipul.in.mychat.model.User;
@@ -55,7 +57,7 @@ public class ChatListFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_chat_list, container, false);
 
@@ -92,20 +94,20 @@ public class ChatListFragment extends Fragment {
         mRef = FirebaseDatabase.getInstance().getReference();
         mRef.keepSynced(true);
 
-        mRef.child("Chats").child(currUid).orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
+        mRef.child(Constants.FIREBASE_CHATS_NODE).child(currUid).orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
 
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
 
                 final User singleChatAdd = dataSnapshot.getValue(User.class);
                 final String uid = dataSnapshot.getKey();
 
                 singleChatAdd.setUid(uid);
 
-                mRef.child("Users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                mRef.child(Constants.FIREBASE_USERS_NODE).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot ds) {
-                        String phoneNum = ds.child("phoneNum").getValue(String.class);
+                        String phoneNum = ds.child(Constants.FIREBASE_USER_PHONE_NUM).getValue(String.class);
                         if (phoneToNameMap.containsKey(phoneNum)) {
                             singleChatAdd.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
                             singleChatAdd.setProfile_pic(ds.child("profile_pic").getValue(String.class));
@@ -118,7 +120,7 @@ public class ChatListFragment extends Fragment {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
                 });
@@ -127,7 +129,7 @@ public class ChatListFragment extends Fragment {
             }
 
             @Override
-            public void onChildChanged(final DataSnapshot dataSnapshot, String s) {
+            public void onChildChanged(final @NonNull DataSnapshot dataSnapshot, String s) {
 
                 final User singleChatChange = dataSnapshot.getValue(User.class);
                 Log.d("ChatChange", s + " " + dataSnapshot.getValue().toString());
@@ -145,17 +147,17 @@ public class ChatListFragment extends Fragment {
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
             }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {
 
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });

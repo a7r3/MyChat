@@ -1,6 +1,7 @@
 package vipul.in.mychat;
 
 import android.app.Application;
+import android.support.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -11,6 +12,8 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
+
+import vipul.in.mychat.util.Constants;
 
 /**
  * Created by vipul on 11/1/18.
@@ -27,7 +30,7 @@ public class MyChat extends Application {
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         Picasso.Builder builder = new Picasso.Builder(this);
-        builder.downloader(new OkHttp3Downloader(this,Integer.MAX_VALUE));
+//        builder.downloader(new OkHttp3Downloader(this,Integer.MAX_VALUE));
         Picasso built = builder.build();
         built.setIndicatorsEnabled(false);
         built.setLoggingEnabled(true);
@@ -37,20 +40,17 @@ public class MyChat extends Application {
         mAuth = FirebaseAuth.getInstance();
 
         if (mAuth.getCurrentUser() != null) {
-            mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
+            mUserDatabase = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(mAuth.getCurrentUser().getUid());
             mUserDatabase.addValueEventListener(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (dataSnapshot != null) {
-                        mUserDatabase.child("isOnline").onDisconnect().setValue("false");
-                        mUserDatabase.child("lastSeen").onDisconnect().setValue(ServerValue.TIMESTAMP);
-                        //mUserDatabase.child("isOnline").setValue(true);
-                    }
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                     mUserDatabase.child(Constants.FIREBASE_USER_IS_ONLINE).onDisconnect().setValue("false");
+                     mUserDatabase.child(Constants.FIREBASE_USER_LASTSEEN).onDisconnect().setValue(ServerValue.TIMESTAMP);
+                   //mUserDatabase.child("isOnline").setValue(true);
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
             });

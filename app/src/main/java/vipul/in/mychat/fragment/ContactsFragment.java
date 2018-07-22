@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,7 +43,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import vipul.in.mychat.MarginDividerItemDecoration;
+import vipul.in.mychat.util.Constants;
+import vipul.in.mychat.util.MarginDividerItemDecoration;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ContactsAdapter;
 import vipul.in.mychat.model.User;
@@ -80,7 +82,7 @@ public class ContactsFragment extends Fragment {
 
     public void fetch_data() {
 
-        userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users");
+        userDatabaseReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE);
         userDatabaseReference.keepSynced(true);
 
         Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
@@ -101,9 +103,9 @@ public class ContactsFragment extends Fragment {
 
         userDatabaseReference.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
                 User contact = dataSnapshot.getValue(User.class);
-                final String phoneNum = dataSnapshot.child("phoneNum").getValue(String.class);
+                final String phoneNum = dataSnapshot.child(Constants.FIREBASE_USER_PHONE_NUM).getValue(String.class);
 
                 if (!phoneToNameMap.containsKey(phoneNum)) return;
 
@@ -112,25 +114,25 @@ public class ContactsFragment extends Fragment {
                 userList.add(contact);
                 adapter.notifyItemInserted(userList.size() - 1);
                 final String friendUid = dataSnapshot.getKey();
-                friendsDatabase = FirebaseDatabase.getInstance().getReference().child("Friends");
+                friendsDatabase = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_FRIENDS_NODE);
                 friendsDatabase.keepSynced(true);
-                friendsDatabase.child(currUid).child(friendUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                friendsDatabase.child(currUid).child(friendUid).child(Constants.FIREBASE_USER_NAME).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot ds) {
+                    public void onDataChange(@NonNull DataSnapshot ds) {
                         if (!ds.exists()) {
-                            FirebaseDatabase.getInstance().getReference().child("Friends").child(currUid).child(friendUid).child("name").setValue(phoneToNameMap.get(phoneNum).toString());
+                            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_FRIENDS_NODE).child(currUid).child(friendUid).child("name").setValue(phoneToNameMap.get(phoneNum).toString());
                         }
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
                 });
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, String s) {
                 User contact = dataSnapshot.getValue(User.class);
                 ListIterator<User> it = userList.listIterator();
                 while (it.hasNext()) {
@@ -148,27 +150,27 @@ public class ContactsFragment extends Fragment {
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
             }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, String s) {
 
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
     }
 
-    /**
-     * Saves Profile Pictures / Thumbnails of the User to Internal/External Storage
-     *
-     * @param contact The User whose profile picture has to be saved
-     */
+//    /**
+//     * Saves Profile Pictures / Thumbnails of the User to Internal/External Storage
+//     *
+//     * @param contact The User whose profile picture has to be saved
+//     */
 //    public void saveProfilePictures(User contact) {
 //        if (sharedPreferencesThumbLive.getString(contact.getUid(), "null").equals("null")) {
 //            editorThumbLive.putString(contact.getUid(), contact.getThumb_pic());
@@ -270,12 +272,12 @@ public class ContactsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseDatabase.getInstance().getReference().child("Users").child(currUid).child("isOnline").setValue("true");
+        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currUid).child(Constants.FIREBASE_USER_IS_ONLINE).setValue("true");
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
 

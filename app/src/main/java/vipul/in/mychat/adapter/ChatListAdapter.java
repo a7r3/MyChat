@@ -32,6 +32,7 @@ import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
+import vipul.in.mychat.util.Constants;
 
 /**
  * Created by vipul on 23/1/18.
@@ -68,18 +69,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.name_from.setText(singleChat.getName());
         holder.last_message.setText(singleChat.getLastMessage());
 
-        if ("default".equals(singleChat.getThumb_pic())) {
+        if (Constants.DEFAULT_PROFILE_PICTURE.equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
-            Picasso.with(mContext).load(Uri.parse(singleChat.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
+            Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
                 @Override
                 public void onSuccess() {
-
                 }
 
                 @Override
-                public void onError() {
-                    Picasso.with(mContext).load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
+                public void onError(Exception e) {
+                    Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
                 }
             });
         }
@@ -94,13 +94,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             @Override
             public void onClick(View v) {
                 Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
-                if ("default".equals(singleChat.getProfile_pic())) {
-                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
-                } else {
-                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, singleChat.getProfile_pic());
-                }
+                imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, singleChat.getProfile_pic());
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, singleChat.getName());
-                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, singleChat.getUid());
+                imageDialogIntent.putExtra(Constants.RECEIVER_UID_EXTRA, singleChat.getUid());
 
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.thumbnail, "image_transition");
 

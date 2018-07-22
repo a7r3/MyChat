@@ -25,6 +25,7 @@ import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
+import vipul.in.mychat.util.Constants;
 
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ContactsViewHolder> {
 
@@ -62,15 +63,15 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         if ("default".equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
-            Picasso.with(context).load(Uri.parse(contacts.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
+            Picasso.get().load(Uri.parse(contacts.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
                 @Override
                 public void onSuccess() {
 
                 }
 
                 @Override
-                public void onError() {
-                    Picasso.with(context).load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
+                public void onError(Exception e) {
+                    Picasso.get().load(Uri.parse(contacts.getThumb_pic())).into(holder.thumbnail);
                 }
             });
         }
@@ -92,13 +93,9 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             @Override
             public void onClick(View v) {
                 Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
-                if ("default".equals(contacts.getProfile_pic())) {
-                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, ImageDialogActivity.NO_IMAGE_EXTRA);
-                } else {
-                    imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, contacts.getProfile_pic());
-                }
+                imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, contacts.getProfile_pic());
                 imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, contacts.getName());
-                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_UID_EXTRA, contacts.getUid());
+                imageDialogIntent.putExtra(Constants.RECEIVER_UID_EXTRA, contacts.getUid());
 
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.thumbnail, "image_transition");
 

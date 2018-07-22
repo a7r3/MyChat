@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="10"
                 android:background="@android:color/transparent"
-                android:hint="Write a message"
+                android:hint="Type a message"
                 android:textSize="18sp"
                 emojicon:emojiconSize="28sp" />
 

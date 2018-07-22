@@ -1,4 +1,4 @@
-package vipul.in.mychat;
+package vipul.in.mychat.util;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import vipul.in.mychat.R;
 import vipul.in.mychat.activity.MainActivity;
 
 /**

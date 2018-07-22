@@ -28,6 +28,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,6 +58,7 @@ import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ViewPagerAdapter;
 import vipul.in.mychat.fragment.ChatListFragment;
 import vipul.in.mychat.fragment.ContactsFragment;
+import vipul.in.mychat.util.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 if ("default".equals(sharedPreferences.getString("profile_pic", "default"))) {
                     imageView.setImageResource(R.drawable.ic_person_black_24dp);
                 } else {
-                    Picasso.with(MainActivity.this)
+                    Picasso.get()
                             .load(sharedPreferences.getString("profile_pic", "default"))
                             .networkPolicy(NetworkPolicy.OFFLINE)
                             .into(imageView, new Callback() {
@@ -178,8 +180,8 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void onError() {
-                                    Picasso.with(MainActivity.this).load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
+                                public void onError(Exception e) {
+                                    Picasso.get().load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
                                 }
                             });
                 }
@@ -207,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (!image.equals("default")) {
                     final Uri imageUri = Uri.parse(sharedPreferences.getString("profile_pic", "default"));
-                    Picasso.with(MainActivity.this)
+                    Picasso.get()
                             .load(imageUri)
                             .placeholder(R.drawable.ic_person_black_24dp)
                             .networkPolicy(NetworkPolicy.OFFLINE)
@@ -218,15 +220,15 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void onError() {
-                                    Picasso.with(MainActivity.this)
+                                public void onError(Exception e) {
+                                    Picasso.get()
                                             .load(imageUri)
                                             .placeholder(R.drawable.ic_person_black_24dp)
                                             .into(profileBottomSheetImage);
                                 }
                             });
 
-                    Picasso.with(MainActivity.this)
+                    Picasso.get()
                             .load(imageUri)
                             .placeholder(R.drawable.ic_person_black_24dp)
                             .networkPolicy(NetworkPolicy.OFFLINE)
@@ -237,8 +239,8 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void onError() {
-                                    Picasso.with(MainActivity.this)
+                                public void onError(Exception e) {
+                                    Picasso.get()
                                             .load(imageUri)
                                             .placeholder(R.drawable.ic_person_black_24dp)
                                             .into(profileView);
@@ -332,8 +334,8 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         Log.d("Tag", "mainActivity_onPause");
         if (currentUser != null) {
-            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("false");
-            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
+            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child("isOnline").setValue("false");
+            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
         }
     }
 
@@ -411,37 +413,41 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
-                            final String download_url = task.getResult().getDownloadUrl().toString();
-                            UploadTask uploadTask = thumb_filepath.putBytes(thumb_byte);
-                            uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                            filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
-                                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> thumb_task) {
-                                    final String thumb_downloadUrl = thumb_task.getResult().getDownloadUrl().toString();
-                                    if (thumb_task.isSuccessful()) {
-                                        Map update_hashMap = new HashMap();
-                                        update_hashMap.put("profile_pic", download_url);
-                                        update_hashMap.put("thumb_pic", thumb_downloadUrl);
-                                        mUserDatabase.updateChildren(update_hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    mProgressDialog.dismiss();
+                                public void onSuccess(final Uri uri) {
+                                    UploadTask uploadTask = thumb_filepath.putBytes(thumb_byte);
+                                    uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> thumb_task) {
+//                                            final String thumb_downloadUrl = thumb_task.getResult().getDownloadUrl().toString();
+                                            if (thumb_task.isSuccessful()) {
+                                                Map<String, Object> update_hashMap = new HashMap<>();
+                                                update_hashMap.put("profile_pic", uri.toString());
+//                                                update_hashMap.put("thumb_pic", thumb_downloadUrl);
+                                                mUserDatabase.updateChildren(update_hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            mProgressDialog.dismiss();
 
-                                                    editor.putString("profile_pic", download_url);
-                                                    editor.putString("thumb_pic", thumb_downloadUrl);
-                                                    editor.apply();
+                                                            editor.putString("profile_pic",uri.toString());
+//                                                            editor.putString("thumb_pic", thumb_downloadUrl);
+                                                            editor.apply();
 
-                                                    Picasso.with(MainActivity.this).load(Uri.parse(download_url)).into(profileBottomSheetImage);
-                                                    Picasso.with(MainActivity.this).load(Uri.parse(download_url)).into(profileView);
-                                                    //Toast.makeText(getParentFragment().getContext(), "Success Uploading.", Toast.LENGTH_LONG).show();
-                                                }
+                                                            Picasso.get().load(uri).into(profileBottomSheetImage);
+                                                            Picasso.get().load(uri).into(profileView);
+                                                            //Toast.makeText(getParentFragment().getContext(), "Success Uploading.", Toast.LENGTH_LONG).show();
+                                                        }
+                                                    }
+                                                });
+
+                                            } else {
+                                                //Toast.makeText(getParentFragment().getContext(), "Error in uploading thumbnail.", Toast.LENGTH_LONG).show();
+                                                mProgressDialog.dismiss();
                                             }
-                                        });
-
-                                    } else {
-                                        //Toast.makeText(getParentFragment().getContext(), "Error in uploading thumbnail.", Toast.LENGTH_LONG).show();
-                                        mProgressDialog.dismiss();
-                                    }
+                                        }
+                                    });
                                 }
                             });
                         } else {
