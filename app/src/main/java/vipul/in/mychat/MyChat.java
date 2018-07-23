@@ -13,6 +13,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
+import butterknife.ButterKnife;
 import vipul.in.mychat.util.Constants;
 
 /**
@@ -35,7 +36,6 @@ public class MyChat extends Application {
         built.setIndicatorsEnabled(false);
         built.setLoggingEnabled(true);
         Picasso.setSingletonInstance(built);
-
 
         mAuth = FirebaseAuth.getInstance();
 

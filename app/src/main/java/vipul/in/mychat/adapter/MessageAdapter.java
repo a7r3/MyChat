@@ -26,7 +26,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.util.Constants;
-import vipul.in.mychat.util.Utils;
+import vipul.in.mychat.util.UtilityMethods;
 import vipul.in.mychat.model.Message;
 
 /**
@@ -149,7 +149,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             String nextMessageUser = messageList.get(position + 1).getFrom();
             if(!currentMessageUser.equals(nextMessageUser)) {
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.messageBubble.getLayoutParams();
-                params.bottomMargin = (int) Utils.convertDpToPixel(8.0f, context);
+                params.bottomMargin = (int) UtilityMethods.convertDpToPixel(8.0f, context);
                 holder.messageBubble.setLayoutParams(params);
                 holder.profileImage.setVisibility(View.VISIBLE);
             } else if (messageDates.contains(position + 1)){

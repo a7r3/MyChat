@@ -44,10 +44,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
 import vipul.in.mychat.util.Constants;
+import vipul.in.mychat.util.UtilityMethods;
 
 public class OnboardActivity extends AppCompatActivity {
 
@@ -84,12 +91,13 @@ public class OnboardActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                onboardConversation.add(
-                        new Message(message, System.currentTimeMillis(), "IntroBot")
-                );
+                messageAdapter.notifyDataSetChanged();
                 onboardRecyclerView.smoothScrollToPosition(onboardConversation.size() - 1);
             }
-        }, 1000);
+        }, 500);
+        onboardConversation.add(
+                new Message(message, System.currentTimeMillis(), "IntroBot")
+        );
     }
 
     /**
@@ -102,7 +110,13 @@ public class OnboardActivity extends AppCompatActivity {
         onboardConversation.add(
                 new Message(message, System.currentTimeMillis(), "Me")
         );
-        onboardRecyclerView.smoothScrollToPosition(onboardConversation.size() - 1);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                messageAdapter.notifyDataSetChanged();
+                onboardRecyclerView.smoothScrollToPosition(onboardConversation.size() - 1);
+            }
+        }, 500);
     }
 
     public void signInWithPhoneAuthCredential(PhoneAuthCredential phoneAuthCredential) {
@@ -237,6 +251,14 @@ public class OnboardActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        disposable.dispose();
+    }
+
+    private Disposable disposable;
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboard);
@@ -283,6 +305,18 @@ public class OnboardActivity extends AppCompatActivity {
             finish();
         }
 
+        disposable = Observable.interval(0, 5, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) throws Exception {
+                        if(!UtilityMethods.isNetworkAvailable(OnboardActivity.this)) {
+
+                        }
+                    }
+                })
+                .subscribe();
 
         countryCodePicker = findViewById(R.id.country_code_picker);
         inputBox = findViewById(R.id.editTextEmoji);

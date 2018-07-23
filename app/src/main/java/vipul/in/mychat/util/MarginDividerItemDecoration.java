@@ -27,9 +27,9 @@ public class MarginDividerItemDecoration extends RecyclerView.ItemDecoration {
         // The Divider should appear only for the Textual Details
 
         // Left Margin = Width of the Profile Picture = 16dp + 48dp (Actual width) + 16dp = 80dp
-        int left = (int) Utils.convertDpToPixel(80.0f, context);
+        int left = (int) UtilityMethods.convertDpToPixel(80.0f, context);
         // Right Margin = 16dp
-        int rightSub = (int) Utils.convertDpToPixel(16.0f, context);
+        int rightSub = (int) UtilityMethods.convertDpToPixel(16.0f, context);
 
         c.save();
         int childCount = parent.getChildCount();
