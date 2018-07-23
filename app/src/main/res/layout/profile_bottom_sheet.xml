@@ -21,8 +21,6 @@
             android:layout_height="104dp"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_person_black_24dp"
-            app:civ_border_color="@color/colorPrimaryDark"
-            app:civ_border_width="2dp"
             app:civ_circle_background_color="#E2E8EA" />
 
         <android.support.design.widget.FloatingActionButton
@@ -32,6 +30,7 @@
             android:layout_alignBottom="@id/profile_bottom_sheet_image"
             android:layout_alignEnd="@id/profile_bottom_sheet_image"
             android:src="@drawable/ic_edit_black_24dp"
+            android:tint="@color/colorPrimary"
             app:fabSize="mini" />
 
     </RelativeLayout>

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -21,6 +22,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -58,6 +62,19 @@ import vipul.in.mychat.util.UtilityMethods;
 
 public class OnboardActivity extends AppCompatActivity {
 
+    @BindView(R.id.onboard_recycler_view)
+    RecyclerView onboardRecyclerView;
+    @BindView(R.id.country_code_picker)
+    CountryCodePicker countryCodePicker;
+    @BindView(R.id.editTextEmoji)
+    EditText inputBox;
+    @BindView(R.id.emojiButton)
+    ImageButton emojiButton;
+    @BindView(R.id.send_message_button)
+    ImageButton sendMessageButton;
+    @BindView(R.id.onboard_network_status)
+    TextView onboardNetworkStatusText;
+
     private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
     private final int ASK_PHONE_NUMBER = 0;
     private final int ASK_OTP = 1;
@@ -67,12 +84,7 @@ public class OnboardActivity extends AppCompatActivity {
     private final int FINAL_DESTINATION = 5;
     private final String TAG = getClass().getSimpleName();
     private List<Message> onboardConversation = new ArrayList<>();
-    private RecyclerView onboardRecyclerView;
     private MessageAdapter messageAdapter;
-    private CountryCodePicker countryCodePicker;
-    private EditText inputBox;
-    private ImageButton emojiButton;
-    private ImageButton sendMessageButton;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private String originalVerificationId;
     private DatabaseReference databaseReference;
@@ -262,6 +274,7 @@ public class OnboardActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_onboard);
+        ButterKnife.bind(this);
 
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -312,18 +325,16 @@ public class OnboardActivity extends AppCompatActivity {
                     @Override
                     public void accept(Long aLong) throws Exception {
                         if(!UtilityMethods.isNetworkAvailable(OnboardActivity.this)) {
-
+                            onboardNetworkStatusText.setText("You are Offline");
+                            onboardNetworkStatusText.setBackgroundColor(Color.parseColor("#F44336"));
+                        } else {
+                            onboardNetworkStatusText.setText("We're connected");
+                            onboardNetworkStatusText.setBackgroundColor(Color.parseColor("#4CAF50"));
                         }
                     }
                 })
                 .subscribe();
 
-        countryCodePicker = findViewById(R.id.country_code_picker);
-        inputBox = findViewById(R.id.editTextEmoji);
-        sendMessageButton = findViewById(R.id.send_message_button);
-        emojiButton = findViewById(R.id.emojiButton);
-        onboardRecyclerView = findViewById(R.id.onboard_recycler_view);
-        // TODO: New Avatars needed
         messageAdapter = new MessageAdapter(onboardConversation, this, Constants.DEFAULT_PROFILE_PICTURE, Constants.DEFAULT_PROFILE_PICTURE);
         onboardRecyclerView.setAdapter(messageAdapter);
         onboardRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));

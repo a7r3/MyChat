@@ -184,7 +184,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
 
         if(!from_user.equals("Me")) {
-
             if (friendThumb.equals(Constants.DEFAULT_PROFILE_PICTURE)) {
                 holder.profileImage.setImageResource(R.drawable.ic_person_black_24dp);
             } else {

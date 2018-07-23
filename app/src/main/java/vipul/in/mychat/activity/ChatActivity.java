@@ -48,13 +48,17 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
 import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
@@ -65,37 +69,51 @@ import vipul.in.mychat.util.Constants;
 
 public class ChatActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
-    private final String TAG = getClass().getSimpleName();
-    private final List<Message> msgList = new ArrayList<>();
-    String receiverNameExtra;
-    Boolean friendTyping = false;
-    DatabaseReference userDatabaseReference;
-    TextView receiverName, receiverLastSeen;
-    LinearLayoutManager linearLayoutManager;
-    MessageAdapter messageAdapter;
-    ImageButton imageButton, emojiButton;
+    TextView receiverName;
+    TextView receiverLastSeen;
+    @BindView(R.id.imageButton)
+    ImageButton imageButton;
+    @BindView(R.id.emojiButton)
+    ImageButton emojiButton;
+    @BindView(R.id.editTextEmoji)
     EmojiconEditText editText;
+    @BindView(R.id.root_view)
     View rootView;
-    SharedPreferences sharedPreferences;
-    InterstitialAd mInterstitialAd;
-    RewardedVideoAd mRewardedVideoAd;
+    @BindView(R.id.messageList)
     RecyclerView chatRecyclerView;
+    @BindView(R.id.chat_toolbar)
     Toolbar chat_toolbar;
-    String senderUid;
-    String myThumb, friendThumb;
-    private CircleImageView chatProfileImage;
+    @BindView(R.id.attachButton)
+    ImageButton sendAttach;
+    @BindView(R.id.chat_activity_move_to_bottom)
+    FloatingActionButton moveToBottomButton;
+
+    CircleImageView chatProfileImage;
+    LinearLayoutManager linearLayoutManager;
+
+    // Profile Bottom Sheet
+    View profileBottomSheetView;
+    CircleImageView profileBottomSheetImage;
+    TextView profileBottomSheetName;
+    TextView profileBottomSheetStatus;
+    FloatingActionButton imageSelectorButton;
+
+    BottomSheetDialog profileBottomSheetDialog;
+
     private String receiverUid;
     private boolean typingStarted;
     private DatabaseReference mRef, rootDatabaseReference, myReference;
-    private View profileBottomSheetView;
-    private CircleImageView profileBottomSheetImage;
-    private TextView profileBottomSheetName;
-    private TextView profileBottomSheetStatus;
-    private FloatingActionButton imageSelectorButton;
-    private ImageView statusEditorButton;
-    private BottomSheetDialog profileBottomSheetDialog;
-
-    ImageButton sendAttach;
+    private SharedPreferences sharedPreferences;
+    private InterstitialAd mInterstitialAd;
+    private RewardedVideoAd mRewardedVideoAd;
+    private final String TAG = getClass().getSimpleName();
+    private final List<Message> msgList = new ArrayList<>();
+    private String receiverNameExtra;
+    private Boolean friendTyping = false;
+    private DatabaseReference userDatabaseReference;
+    private String senderUid;
+    private String myThumb, friendThumb;
+    private MessageAdapter messageAdapter;
 
     @Override
     protected void onStart() {
@@ -142,12 +160,11 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         Log.d(TAG, "OnCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        ButterKnife.bind(this);
 
         initializeAd();
 
         sharedPreferences = getSharedPreferences(Constants.SPREF_USER_INFO, MODE_PRIVATE);
-
-        sendAttach = findViewById(R.id.attachButton);
 
         myThumb = sharedPreferences.getString(Constants.SPREF_USER_THUMB_PICTURE, Constants.DEFAULT_PROFILE_PICTURE);
         friendThumb = getIntent().getStringExtra(Constants.SPREF_FRIEND_THUMB);
@@ -160,7 +177,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
 
         messageAdapter = new MessageAdapter(msgList, this, myThumb, friendThumb);
-        chatRecyclerView = findViewById(R.id.messageList);
 
         linearLayoutManager = new LinearLayoutManager(this);
         chatRecyclerView.setLayoutManager(linearLayoutManager);
@@ -179,14 +195,13 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
             @Override
             public void onKeyboardClose() {
-                Log.e(TAG, "Keyboard Closed");
+                Log.d(TAG, "Keyboard Closed");
             }
 
         });
 
 
         editText.addTextChangedListener(new TextWatcher() {
-
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -219,8 +234,35 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
             }
 
+            });
+
+        chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                // If the last visible item in the list is the second-last item
+                // Show the Move-To-Last-Message FAB
+                // If the last visible item in the list is the last item itself
+                // Hide the Move-To-Last-Message FAB
+                if(messageAdapter.getItemCount() - 2 == linearLayoutManager.findLastVisibleItemPosition())
+                    moveToBottomButton.show();
+                else if(messageAdapter.getItemCount() - 1 == linearLayoutManager.findLastVisibleItemPosition())
+                    moveToBottomButton.hide();
+            }
         });
 
+        // Pressing this button would smooth scroll the message list to the last message
+        moveToBottomButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatRecyclerView.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+            }
+        });
         rootDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
         rootDatabaseReference.keepSynced(true);
@@ -232,7 +274,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         View chatCustomToolbar = LayoutInflater.from(this).inflate(R.layout.chat_app_bar, null);
         chatProfileImage = chatCustomToolbar.findViewById(R.id.chatProfilePicture);
-
+        receiverName = chatCustomToolbar.findViewById(R.id.chatPersonName);
+        receiverLastSeen = chatCustomToolbar.findViewById(R.id.chatLastSeen);
         userDatabaseReference.child(receiverUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -250,16 +293,38 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                             .load(imageUri)
                             .placeholder(R.drawable.ic_person_black_24dp)
                             .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(profileBottomSheetImage);
-                    //profileBottomSheetImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendProfilePic")));
-                    //chatProfileImage.setImageURI(Uri.parse(getIntent().getStringExtra(Constants.SPREF_USER_THUMB_PICTURE)));
+                            .into(profileBottomSheetImage, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Picasso.get()
+                                            .load(imageUri)
+                                            .placeholder(R.drawable.ic_person_black_24dp)
+                                            .into(profileBottomSheetImage);
+                                }
+                            });
                     Picasso.get()
                             .load(imageUri)
                             .placeholder(R.drawable.ic_person_black_24dp)
                             .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(chatProfileImage);
-                } else {
-                    profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
+                            .into(chatProfileImage, new Callback() {
+                                @Override
+                                public void onSuccess() {
+
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Picasso.get()
+                                            .load(imageUri)
+                                            .placeholder(R.drawable.ic_person_black_24dp)
+                                            .into(chatProfileImage);
+                                }
+                            });
                 }
 
             }
@@ -270,7 +335,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
-        chat_toolbar = findViewById(R.id.chat_toolbar);
         setSupportActionBar(chat_toolbar);
 
         if(getSupportActionBar() != null) {
@@ -330,7 +394,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    if (dataSnapshot.getValue(Boolean.class)) {
+                    if (Objects.requireNonNull(dataSnapshot.getValue(Boolean.class))) {
                         receiverLastSeen.setText("Typing...");
 
                         friendTyping = true;
@@ -351,9 +415,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
         rootDatabaseReference.child(Constants.FIREBASE_USERS_NODE).child(receiverUid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                 watchLastSeen();
-
             }
 
             @Override
@@ -361,6 +423,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
             }
         });
+
         loadMessages();
 
         profileBottomSheetView = LayoutInflater.from(this).inflate(R.layout.profile_bottom_sheet, null);
@@ -407,10 +470,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     public void initializeAd() {
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
-        imageButton = findViewById(R.id.imageButton);
-        emojiButton = findViewById(R.id.emojiButton);
-        editText = findViewById(R.id.editTextEmoji);
-        rootView = findViewById(R.id.root_view);
 
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId("ca-app-pub-6712400715312717/2525168130");
@@ -612,23 +671,23 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                                 messageUserMap.put(senderMessageReference + "/" + pushId, messageMap);
                                 messageUserMap.put(receiverMessageReference + "/" + pushId, messageMap);
 
-                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(senderUid).child(receiverUid).child("seen").setValue(true);
+                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(senderUid).child(receiverUid).child(Constants.FIREBASE_CHATS_SEEN).setValue(true);
                                 // Set the latest message of this Chat as this message
-                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(senderUid).child(receiverUid).child("lastMessage").setValue("Image");
+                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(senderUid).child(receiverUid).child(Constants.FIREBASE_CHATS_LAST_MESSAGE).setValue("Image");
                                 // Set the latest message's timestamp as this message's timestamp
-                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(senderUid).child(receiverUid).child("timestamp").setValue(ServerValue.TIMESTAMP);
+                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(senderUid).child(receiverUid).child(Constants.FIREBASE_CHATS_TIMESTAMP).setValue(ServerValue.TIMESTAMP);
 
                                 // Until the Receiver doesn't see this message, set it to false
-                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child("seen").setValue(false);
+                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child(Constants.FIREBASE_CHATS_SEEN).setValue(false);
                                 // Set the latest message of this Chat as this message
-                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child("lastMessage").setValue("Image");
+                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child(Constants.FIREBASE_CHATS_LAST_MESSAGE).setValue("Image");
                                 // Set the latest message's timestamp as this message's timestamp
-                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child("timestamp").setValue(ServerValue.TIMESTAMP);
+                                rootDatabaseReference.child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child(Constants.FIREBASE_CHATS_TIMESTAMP).setValue(ServerValue.TIMESTAMP);
 
                                 // Update this 'Messages' node with the New Message
                                 rootDatabaseReference.updateChildren(messageUserMap, new DatabaseReference.CompletionListener() {
                                     @Override
-                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                    public void onComplete(@NonNull DatabaseError databaseError, DatabaseReference databaseReference) {
                                         if(databaseError != null)
                                             Log.e(TAG, "sendMessage : " + databaseError.getMessage());
                                     }
@@ -646,16 +705,16 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         if (!friendTyping) {
             mRef = userDatabaseReference.child(receiverUid);
-            mRef.child(Constants.FIREBASE_USER_IS_ONLINE).addValueEventListener(new ValueEventListener() {
+            mRef.child(Constants.FIREBASE_USER_IS_ONLINE).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if ("true".equals(dataSnapshot.getValue(String.class))) {
                         receiverLastSeen.setText("Online");
                     } else {
-                        mRef.child(Constants.FIREBASE_USER_LASTSEEN).addValueEventListener(new ValueEventListener() {
+                        mRef.child(Constants.FIREBASE_USER_LASTSEEN).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                long timeStamp = dataSnapshot.getValue(Long.class);
+                                long timeStamp = Objects.requireNonNull(dataSnapshot.getValue(Long.class));
                                 Log.d(TAG, "LastSeen : " + timeStamp);
                                 receiverLastSeen.setText(DateUtils.getRelativeTimeSpanString(timeStamp));
                             }

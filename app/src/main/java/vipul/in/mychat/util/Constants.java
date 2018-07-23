@@ -35,6 +35,8 @@ public class Constants {
     public static final String FIREBASE_CHATS_NODE = "Chats";
     public static final String FIREBASE_CHATS_TYPING = "typing";
     public static final String FIREBASE_CHATS_TIMESTAMP = "timestamp";
+    public static final String FIREBASE_CHATS_LAST_MESSAGE = "lastMessage";
+    public static final String FIREBASE_CHATS_SEEN = "seen";
 
     // "Messages" node
     public static final String FIREBASE_MESSAGES_NODE = "Messages";
