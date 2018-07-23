@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -46,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.MessageAdapter;
 import vipul.in.mychat.model.Message;
+import vipul.in.mychat.util.Constants;
 
 public class OnboardActivity extends AppCompatActivity {
 
@@ -85,7 +87,7 @@ public class OnboardActivity extends AppCompatActivity {
                 onboardConversation.add(
                         new Message(message, System.currentTimeMillis(), "IntroBot")
                 );
-                messageAdapter.notifyItemInserted(onboardConversation.size() - 1);
+                onboardRecyclerView.smoothScrollToPosition(onboardConversation.size() - 1);
             }
         }, 1000);
     }
@@ -100,7 +102,7 @@ public class OnboardActivity extends AppCompatActivity {
         onboardConversation.add(
                 new Message(message, System.currentTimeMillis(), "Me")
         );
-        messageAdapter.notifyItemInserted(onboardConversation.size() - 1);
+        onboardRecyclerView.smoothScrollToPosition(onboardConversation.size() - 1);
     }
 
     public void signInWithPhoneAuthCredential(PhoneAuthCredential phoneAuthCredential) {
@@ -186,32 +188,40 @@ public class OnboardActivity extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        databaseReference.child("phoneNum").setValue(user.getPhoneNumber());
+                        databaseReference.child(Constants.FIREBASE_USER_PHONE_NUM).setValue(user.getPhoneNumber());
                         databaseReference.child("device_token").setValue(FirebaseInstanceId.getInstance().getToken());
 
-                        databaseReference.child("profile_pic").addValueEventListener(new ValueEventListener() {
+                        databaseReference.child(Constants.FIREBASE_USER_PROFILE_PIC).addValueEventListener(new ValueEventListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if (!dataSnapshot.exists()) {
-                                    FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child("profile_pic").setValue("default");
+                                    FirebaseDatabase.getInstance().getReference()
+                                            .child(Constants.FIREBASE_USERS_NODE)
+                                            .child(user.getUid())
+                                            .child(Constants.FIREBASE_USER_PROFILE_PIC)
+                                            .setValue(Constants.DEFAULT_PROFILE_PICTURE);
                                 }
                             }
 
                             @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
                             }
                         });
-                        databaseReference.child("thumb_pic").addValueEventListener(new ValueEventListener() {
+                        databaseReference.child(Constants.FIREBASE_USER_THUMB_PIC).addValueEventListener(new ValueEventListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 if (!dataSnapshot.exists()) {
-                                    FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid()).child("thumb_pic").setValue("default");
+                                    FirebaseDatabase.getInstance().getReference()
+                                            .child(Constants.FIREBASE_USERS_NODE)
+                                            .child(user.getUid())
+                                            .child(Constants.FIREBASE_USER_THUMB_PIC)
+                                            .setValue(Constants.DEFAULT_PROFILE_PICTURE);
                                 }
                             }
 
                             @Override
-                            public void onCancelled(DatabaseError databaseError) {
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
 
                             }
                         });
@@ -236,36 +246,36 @@ public class OnboardActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             Log.d(TAG, "USER IS NOTNULL");
-            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).child("isOnline").setValue("true");
-            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference().child("Users");
+            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child(Constants.FIREBASE_USER_IS_ONLINE).setValue("true");
+            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE);
             mRef.keepSynced(true);
 
-            SharedPreferences sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = getSharedPreferences(Constants.SPREF_USER_INFO, Context.MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
 
             editor.putString("initialized", "YES");
 
-            mRef.child(mAuth.getCurrentUser().getUid()).child("profile_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+            mRef.child(mAuth.getCurrentUser().getUid()).child(Constants.FIREBASE_USER_PROFILE_PIC).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    editor.putString("profile_pic", dataSnapshot.getValue(String.class));
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    editor.putString(Constants.SPREF_USER_PROFILE_PICTURE, dataSnapshot.getValue(String.class));
                     editor.apply();
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
             });
-            mRef.child(mAuth.getCurrentUser().getUid()).child("thumb_pic").addListenerForSingleValueEvent(new ValueEventListener() {
+            mRef.child(mAuth.getCurrentUser().getUid()).child(Constants.FIREBASE_USER_THUMB_PIC).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    editor.putString("thumb_pic", dataSnapshot.getValue(String.class));
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    editor.putString(Constants.SPREF_USER_THUMB_PICTURE, dataSnapshot.getValue(String.class));
                     editor.apply();
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
             });
@@ -280,7 +290,7 @@ public class OnboardActivity extends AppCompatActivity {
         emojiButton = findViewById(R.id.emojiButton);
         onboardRecyclerView = findViewById(R.id.onboard_recycler_view);
         // TODO: New Avatars needed
-        messageAdapter = new MessageAdapter(onboardConversation, this, "default", "default");
+        messageAdapter = new MessageAdapter(onboardConversation, this, Constants.DEFAULT_PROFILE_PICTURE, Constants.DEFAULT_PROFILE_PICTURE);
         onboardRecyclerView.setAdapter(messageAdapter);
         onboardRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
@@ -289,7 +299,6 @@ public class OnboardActivity extends AppCompatActivity {
 
         checkAndRequestPermissions();
         onboardUser();
-
 
         // The Send button over here acts differently according to the current Onboard Stage
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
@@ -306,7 +315,7 @@ public class OnboardActivity extends AppCompatActivity {
                         String phoneNumber = countryCodePicker.getFullNumberWithPlus();
                         // Hide the CountryCodePicker
                         countryCodePicker.setVisibility(View.GONE);
-                        // No more autoformatting for future messages required
+                        // No more auto-formatting for future messages required
                         countryCodePicker.setNumberAutoFormattingEnabled(false);
                         // Clear the Input Box before OTP verification starts
                         inputBox.getText().clear();
@@ -333,10 +342,10 @@ public class OnboardActivity extends AppCompatActivity {
                         onboardUser();
                         break;
                     case ASK_USER_NAME:
+                        databaseReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(user.getUid());
                         // Set the username in the Database
-                        databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(user.getUid());
                         databaseReference.keepSynced(true);
-                        databaseReference.child("name").setValue(inputBox.getText().toString());
+                        databaseReference.child(Constants.FIREBASE_USER_NAME).setValue(inputBox.getText().toString());
                         // Send this username as a message in the user context
                         sendMessageAsUser(inputBox.getText().toString());
                         // Move on to the next stage viz. Asking for Status
@@ -345,7 +354,7 @@ public class OnboardActivity extends AppCompatActivity {
                         break;
                     case ASK_STATUS:
                         // Set the status in the Database
-                        databaseReference.child("status").setValue(inputBox.getText().toString());
+                        databaseReference.child(Constants.FIREBASE_USER_STATUS).setValue(inputBox.getText().toString());
                         // Send this status as a message in the user context
                         sendMessageAsUser(inputBox.getText().toString());
                         // Move on to the next stage, viz. Asking for a Profile Picture
@@ -355,8 +364,8 @@ public class OnboardActivity extends AppCompatActivity {
                     case ASK_PROFILE_PICTURE:
                         // TODO: Do something about this
                         //Yet to be implemented, set it to default
-                        databaseReference.child("profile_pic").setValue("default");
-                        databaseReference.child("thumb_pic").setValue("default");
+                        databaseReference.child(Constants.FIREBASE_USER_PROFILE_PIC).setValue(Constants.DEFAULT_PROFILE_PICTURE);
+                        databaseReference.child(Constants.FIREBASE_USER_THUMB_PIC).setValue(Constants.DEFAULT_PROFILE_PICTURE);
                         break;
                     case FINAL_DESTINATION:
                         // Give me a break; Nothing to do here
@@ -395,9 +404,8 @@ public class OnboardActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        Log.d("TAG", "Permission callback called-------");
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        Log.d(TAG, "Permission callback called-------");
         switch (requestCode) {
             case REQUEST_ID_MULTIPLE_PERMISSIONS: {
 
@@ -416,9 +424,9 @@ public class OnboardActivity extends AppCompatActivity {
                             && perms.get(Manifest.permission.WRITE_CONTACTS) == PackageManager.PERMISSION_GRANTED
                             && perms.get(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                             && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                        Log.d("YES", "YES");
+                        Log.d(TAG, "YES");
                     } else {
-                        Log.d("TAG", "Some permissions are not granted ask again ");
+                        Log.d(TAG, "Some permissions are not granted ask again ");
                         //permission is denied (this is the first time, when "never ask again" is not checked) so ask again explaining the usage of permission
 //                        // shouldShowRequestPermissionRationale will return true
                         //show the dialog or snackbar saying its necessary and try again otherwise proceed with setup.

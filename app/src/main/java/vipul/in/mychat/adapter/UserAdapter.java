@@ -16,11 +16,14 @@ import java.util.List;
 import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.model.User;
+import vipul.in.mychat.util.Constants;
 
 /**
  * Created by vipul on 23/1/18.
  */
 
+// Until the current adapters are combined back into this Adapter, this is ...
+@Deprecated
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     public static final int MODE_SHOW_CHATS = 220;
@@ -46,7 +49,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     @Override
     public void onBindViewHolder(@NonNull final UserViewHolder holder, int position) {
 
-        final User user = users.get(position);
+        User user = users.get(holder.getAdapterPosition());
 
         holder.userNameText.setText(user.getName());
 
@@ -63,16 +66,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         } else {
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
-
-        holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, ChatActivity.class);
-                intent.putExtra("clicked", user.getName());
-                intent.putExtra("uid", user.getUid());
-                context.startActivity(intent);
-            }
-        });
 
     }
 
@@ -94,6 +87,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             userNameText = itemView.findViewById(R.id.user_name);
             lastMessageOrNumberText = itemView.findViewById(R.id.user_msg_or_contact);
             onlineIndicator = itemView.findViewById(R.id.online_indicator);
+            relativeLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(context, ChatActivity.class);
+                    intent.putExtra(Constants.SELECTED_USER_NAME_EXTRA, users.get(getAdapterPosition()).getName());
+                    intent.putExtra(Constants.RECEIVER_UID_EXTRA, users.get(getAdapterPosition()).getUid());
+                    context.startActivity(intent);
+                }
+            });
         }
     }
 }

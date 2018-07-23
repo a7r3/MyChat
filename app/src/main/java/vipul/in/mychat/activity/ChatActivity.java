@@ -99,7 +99,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     protected void onStart() {
-        Log.d("WAAHChat", "Activity onStart");
+        Log.d(TAG, "Activity onStart");
         super.onStart();
 
         senderUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -109,7 +109,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         myReference.keepSynced(true);
 
-//        myReference.child(Constants.FIREBASE_USERS_NODE).child(senderUid).child(Constants.SPREF_USER_THUMB).addListenerForSingleValueEvent(new ValueEventListener() {
+//        myReference.child(Constants.FIREBASE_USERS_NODE).child(senderUid).child(Constants.SPREF_USER_THUMB_PICTURE).addListenerForSingleValueEvent(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 //                myThumb = dataSnapshot.getValue(String.class);
@@ -122,7 +122,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 //        });
 //
 //
-//        myReference.child(Constants.FIREBASE_USERS_NODE).child(receiverUid).child(Constants.SPREF_USER_THUMB).addListenerForSingleValueEvent(new ValueEventListener() {
+//        myReference.child(Constants.FIREBASE_USERS_NODE).child(receiverUid).child(Constants.SPREF_USER_THUMB_PICTURE).addListenerForSingleValueEvent(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 //                friendThumb = dataSnapshot.getValue(String.class);
@@ -139,7 +139,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("WAAHChat", "OnCreate");
+        Log.d(TAG, "OnCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
@@ -149,10 +149,10 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         sendAttach = findViewById(R.id.attachButton);
 
-        myThumb = sharedPreferences.getString(Constants.SPREF_USER_THUMB, Constants.DEFAULT_PROFILE_PICTURE);
+        myThumb = sharedPreferences.getString(Constants.SPREF_USER_THUMB_PICTURE, Constants.DEFAULT_PROFILE_PICTURE);
         friendThumb = getIntent().getStringExtra(Constants.SPREF_FRIEND_THUMB);
 
-        Log.d("THUMBS:-", myThumb.equals(friendThumb) ? "1" : "0");
+        Log.d(TAG, "Thumbs: " + (myThumb.equals(friendThumb) ? "1" : "0"));
 
 
         receiverUid = getIntent().getStringExtra(Constants.RECEIVER_UID_EXTRA);
@@ -200,16 +200,16 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
                 if (!TextUtils.isEmpty(s.toString()) && s.toString().trim().length() == 1) {
 
-                    Log.d("TYPING", "typingStarted");
+                    Log.d(TAG, "typingStarted");
 
                     typingStarted = true;
-                    FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child(Constants.FIREBASE_CHATS_TYPING_NODE).setValue(typingStarted);
+                    FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child(Constants.FIREBASE_CHATS_TYPING).setValue(typingStarted);
 
                     //send typing started status
 
                 } else if (s.toString().trim().length() == 0 && typingStarted) {
 
-                    Log.d("TYPING", "typingStopped");
+                    Log.d(TAG, "typingStopped");
 
                     typingStarted = false;
                     FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CHATS_NODE).child(receiverUid).child(senderUid).child("typing").setValue(typingStarted);
@@ -252,7 +252,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                             .networkPolicy(NetworkPolicy.OFFLINE)
                             .into(profileBottomSheetImage);
                     //profileBottomSheetImage.setImageURI(Uri.parse(getIntent().getStringExtra("friendProfilePic")));
-                    //chatProfileImage.setImageURI(Uri.parse(getIntent().getStringExtra(Constants.SPREF_USER_THUMB)));
+                    //chatProfileImage.setImageURI(Uri.parse(getIntent().getStringExtra(Constants.SPREF_USER_THUMB_PICTURE)));
                     Picasso.get()
                             .load(imageUri)
                             .placeholder(R.drawable.ic_person_black_24dp)
@@ -288,9 +288,9 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 if (mRewardedVideoAd.isLoaded()) {
                     mRewardedVideoAd.show();
                 } else {
-                    Log.d("TAG", "The interstitial wasn't loaded yet.");
+                    Log.d(TAG, "The interstitial wasn't loaded yet.");
                 }
-                Log.d("Hey", "Hey");
+                Log.d(TAG, "Hey");
             }
         });
 
@@ -508,7 +508,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         // Get the message from the Input Bar
         String msg = editText.getText().toString();
-        Log.d("message", msg);
+        Log.d(TAG, msg);
 
         // If the message is empty, abort the process
         if (TextUtils.isEmpty(msg))

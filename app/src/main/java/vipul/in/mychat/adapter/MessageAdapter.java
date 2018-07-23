@@ -109,8 +109,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
+    @NonNull
     @Override
-    public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int layoutResId = R.layout.incoming_message_layout;
         if (viewType == OUTGOING_MESSAGE_VIEW)
             layoutResId = R.layout.outgoing_message_layout;

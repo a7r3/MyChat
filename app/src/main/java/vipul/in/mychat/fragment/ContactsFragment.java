@@ -1,5 +1,6 @@
 package vipul.in.mychat.fragment;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,9 +11,11 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +46,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import vipul.in.mychat.activity.ChatActivity;
+import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.util.Constants;
 import vipul.in.mychat.util.MarginDividerItemDecoration;
 import vipul.in.mychat.R;
@@ -53,40 +58,28 @@ import vipul.in.mychat.model.User;
 public class ContactsFragment extends Fragment {
 
     DatabaseReference friendsDatabase;
-
+    private final String TAG = getClass().getSimpleName();
     private DatabaseReference userDatabaseReference;
     private ContactsAdapter adapter;
     private List<User> userList;
     private String currUid;
     private RecyclerView contactsRecyclerView;
-
-    private static HashMap sortByValues(HashMap map) {
-        List list = new LinkedList(map.entrySet());
-        // Defined Custom Comparator here
-        Collections.sort(list, new Comparator() {
-            public int compare(Object o1, Object o2) {
-                return ((Comparable) ((Map.Entry) (o1)).getValue())
-                        .compareTo(((Map.Entry) (o2)).getValue());
-            }
-        });
-
-        // Here I am copying the sorted list in HashMap
-        // using LinkedHashMap to preserve the insertion order
-        HashMap sortedHashMap = new LinkedHashMap();
-        for (Iterator it = list.iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            sortedHashMap.put(entry.getKey(), entry.getValue());
-        }
-        return sortedHashMap;
-    }
+    private HashMap<String, String> phoneToNameMap;
 
     public void fetch_data() {
 
         userDatabaseReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE);
         userDatabaseReference.keepSynced(true);
 
-        Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        HashMap<String, String> hm = new HashMap<String, String>();
+        Cursor phones = getContext().getContentResolver().query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null,
+                null,
+                null,
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
+
+        phoneToNameMap = new HashMap<>();
+
         while (phones.moveToNext()) {
             String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -95,10 +88,9 @@ public class ContactsFragment extends Fragment {
             if (phoneNumber.charAt(0) != '+') {
                 phoneNumber = "+91" + phoneNumber;
             }
-            hm.put(phoneNumber, name);
+            phoneToNameMap.put(phoneNumber, name);
         }
 
-        final HashMap phoneToNameMap = sortByValues(hm);
         phones.close();
 
         userDatabaseReference.addChildEventListener(new ChildEventListener() {
@@ -109,7 +101,7 @@ public class ContactsFragment extends Fragment {
 
                 if (!phoneToNameMap.containsKey(phoneNum)) return;
 
-                contact.setName(phoneToNameMap.get(phoneNum).toString());
+                contact.setName(phoneToNameMap.get(phoneNum));
                 contact.setUid(dataSnapshot.getKey());
                 userList.add(contact);
                 adapter.notifyItemInserted(userList.size() - 1);
@@ -120,7 +112,12 @@ public class ContactsFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot ds) {
                         if (!ds.exists()) {
-                            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_FRIENDS_NODE).child(currUid).child(friendUid).child("name").setValue(phoneToNameMap.get(phoneNum).toString());
+                            FirebaseDatabase.getInstance().getReference()
+                                    .child(Constants.FIREBASE_FRIENDS_NODE)
+                                    .child(currUid)
+                                    .child(friendUid)
+                                    .child(Constants.FIREBASE_FRIENDS_NAME)
+                                    .setValue(phoneToNameMap.get(phoneNum));
                         }
                     }
 
@@ -166,6 +163,101 @@ public class ContactsFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currUid).child(Constants.FIREBASE_USER_IS_ONLINE).setValue("true");
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
+
+        userList = new ArrayList<>();
+
+        adapter = new ContactsAdapter(getActivity(), rootView.getContext(), userList);
+
+        adapter.setOnItemClickListener(new ContactsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClicked(View v, User contacts) {
+                Intent intent = new Intent(getActivity(), ChatActivity.class);
+                intent.putExtra(Constants.SELECTED_USER_NAME_EXTRA, contacts.getName());
+                intent.putExtra(Constants.RECEIVER_UID_EXTRA, contacts.getUid());
+                intent.putExtra(Constants.FRIEND_THUMB_PIC_EXTRA, contacts.getThumb_pic());
+                intent.putExtra(Constants.FRIEND_PROFILE_PIC_EXTRA, contacts.getProfile_pic());
+                Log.d(TAG, "Key: " + contacts.getUid());
+                startActivity(intent);
+            }
+        });
+
+        adapter.setOnThumbnailClickListener(new ContactsAdapter.OnThumbnailClickListener() {
+            @Override
+            public void onThumbnailClicked(View v, User contacts) {
+                Intent imageDialogIntent = new Intent(getActivity(), ImageDialogActivity.class);
+                imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, contacts.getProfile_pic());
+                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, contacts.getName());
+                imageDialogIntent.putExtra(Constants.RECEIVER_UID_EXTRA, contacts.getUid());
+
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(), v, "image_transition");
+
+                getActivity().startActivity(imageDialogIntent, options.toBundle());
+                getActivity().overridePendingTransition(0, 0);
+
+            }
+        });
+
+        contactsRecyclerView = rootView.findViewById(R.id.contacts_recyclerView);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
+        contactsRecyclerView.setHasFixedSize(true);
+        MarginDividerItemDecoration itemDecoration = new MarginDividerItemDecoration(getContext());
+        contactsRecyclerView.addItemDecoration(itemDecoration);
+        contactsRecyclerView.setAdapter(adapter);
+
+        fetch_data();
+
+        currUid = FirebaseAuth.getInstance().getUid();
+        return rootView;
+
+    }
+
+    public class SaveFile extends AsyncTask<Void, Void, Void> {
+
+        String downloadUrl;
+        File file;
+
+        public SaveFile(String downloadUrl, File file) {
+            this.downloadUrl = downloadUrl;
+            this.file = file;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                URL url = new URL(downloadUrl);
+                if (file.createNewFile()) {
+                    file.createNewFile();
+                }
+
+                InputStream is = url.openStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                byte[] BYTE = bos.toByteArray();
+                OutputStream ous;
+                ous = new FileOutputStream(file);
+                ous.write(BYTE);
+                ous.close();
+                is.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+    
 //    /**
 //     * Saves Profile Pictures / Thumbnails of the User to Internal/External Storage
 //     *
@@ -269,69 +361,5 @@ public class ContactsFragment extends Fragment {
 //        }
 //    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currUid).child(Constants.FIREBASE_USER_IS_ONLINE).setValue("true");
-    }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
-
-        userList = new ArrayList<>();
-
-        adapter = new ContactsAdapter(getActivity(), rootView.getContext(), userList);
-
-        contactsRecyclerView = rootView.findViewById(R.id.contacts_recyclerView);
-        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
-        contactsRecyclerView.setHasFixedSize(true);
-        MarginDividerItemDecoration itemDecoration = new MarginDividerItemDecoration(getContext());
-        contactsRecyclerView.addItemDecoration(itemDecoration);
-        contactsRecyclerView.setAdapter(adapter);
-
-        fetch_data();
-
-        currUid = FirebaseAuth.getInstance().getUid();
-        return rootView;
-
-    }
-
-    public class SaveFile extends AsyncTask<Void, Void, Void> {
-
-        String downloadUrl;
-        File file;
-
-        public SaveFile(String downloadUrl, File file) {
-            this.downloadUrl = downloadUrl;
-            this.file = file;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                URL url = new URL(downloadUrl);
-                if (file.createNewFile()) {
-                    file.createNewFile();
-                }
-
-                InputStream is = url.openStream();
-                Bitmap bitmap = BitmapFactory.decodeStream(is);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                byte[] BYTE = bos.toByteArray();
-                OutputStream ous;
-                ous = new FileOutputStream(file);
-                ous.write(BYTE);
-                ous.close();
-                is.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
 }

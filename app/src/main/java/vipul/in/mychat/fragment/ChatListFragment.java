@@ -3,9 +3,14 @@ package vipul.in.mychat.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.transition.Explode;
+import android.support.transition.Transition;
+import android.support.transition.TransitionManager;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -32,7 +38,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Observable;
 
+import vipul.in.mychat.activity.ChatActivity;
+import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.util.Constants;
 import vipul.in.mychat.util.MarginDividerItemDecoration;
 import vipul.in.mychat.R;
@@ -44,7 +54,7 @@ public class ChatListFragment extends Fragment {
 
     private final String TAG = getClass().getSimpleName();
 
-    HashMap phoneToNameMap;
+    HashMap<String, String> phoneToNameMap;
     DatabaseReference mRef;
     private RecyclerView chatListRecycler;
     private List<User> chatList;
@@ -63,11 +73,41 @@ public class ChatListFragment extends Fragment {
 
         context = container.getContext();
         currUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         chatListRecycler = rootView.findViewById(R.id.chatListRecycler);
 
         chatList = new ArrayList<>();
 
         chatListAdapter = new ChatListAdapter(rootView.getContext(), chatList, getActivity());
+
+        chatListAdapter.setOnThumbnailClickListener(new ChatListAdapter.OnThumbnailClickListener() {
+            @Override
+            public void onThumbnailClicked(View v, User singleChat) {
+                Intent imageDialogIntent = new Intent(getActivity(), ImageDialogActivity.class);
+                imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, singleChat.getProfile_pic());
+                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, singleChat.getName());
+                imageDialogIntent.putExtra(Constants.RECEIVER_UID_EXTRA, singleChat.getUid());
+
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        Objects.requireNonNull(getActivity()), v, "image_transition");
+
+                startActivity(imageDialogIntent, options.toBundle());
+                getActivity().overridePendingTransition(0, 0);
+            }
+        });
+
+        chatListAdapter.setOnItemClickListener(new ChatListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClicked(View view, User singleChat) {
+                Intent intent = new Intent(getActivity(), ChatActivity.class);
+                intent.putExtra(Constants.SELECTED_USER_NAME_EXTRA, singleChat.getName());
+                intent.putExtra(Constants.RECEIVER_UID_EXTRA, singleChat.getUid());
+                intent.putExtra(Constants.SPREF_FRIEND_THUMB, singleChat.getThumb_pic());
+                intent.putExtra("friendProfilePic", singleChat.getProfile_pic());
+                startActivity(intent);
+            }
+        });
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(rootView.getContext());
         MarginDividerItemDecoration itemDecoration = new MarginDividerItemDecoration(getContext());
         chatListRecycler.addItemDecoration(itemDecoration);
@@ -76,7 +116,9 @@ public class ChatListFragment extends Fragment {
 
 
         Cursor phones = getContext().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
-        HashMap<String, String> hm = new HashMap<String, String>();
+
+        phoneToNameMap = new HashMap<>();
+
         while (phones.moveToNext()) {
             String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -85,16 +127,15 @@ public class ChatListFragment extends Fragment {
             if (phoneNumber.charAt(0) != '+') {
                 phoneNumber = "+91" + phoneNumber;
             }
-            hm.put(phoneNumber, name);
+            phoneToNameMap.put(phoneNumber, name);
         }
 
-        phoneToNameMap = sortByValues(hm);
         phones.close();
 
         mRef = FirebaseDatabase.getInstance().getReference();
         mRef.keepSynced(true);
 
-        mRef.child(Constants.FIREBASE_CHATS_NODE).child(currUid).orderByChild("timestamp").addChildEventListener(new ChildEventListener() {
+        mRef.child(Constants.FIREBASE_CHATS_NODE).child(currUid).orderByChild(Constants.FIREBASE_CHATS_TIMESTAMP).addChildEventListener(new ChildEventListener() {
 
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s) {
@@ -106,13 +147,13 @@ public class ChatListFragment extends Fragment {
 
                 mRef.child(Constants.FIREBASE_USERS_NODE).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot ds) {
+                    public void onDataChange(@NonNull DataSnapshot ds) {
                         String phoneNum = ds.child(Constants.FIREBASE_USER_PHONE_NUM).getValue(String.class);
                         if (phoneToNameMap.containsKey(phoneNum)) {
-                            singleChatAdd.setThumb_pic(ds.child("thumb_pic").getValue(String.class));
-                            singleChatAdd.setProfile_pic(ds.child("profile_pic").getValue(String.class));
-                            singleChatAdd.setIsOnline(ds.child("isOnline").getValue(String.class));
-                            singleChatAdd.setName(phoneToNameMap.get(phoneNum).toString());
+                            singleChatAdd.setThumb_pic(ds.child(Constants.FIREBASE_USER_THUMB_PIC).getValue(String.class));
+                            singleChatAdd.setProfile_pic(ds.child(Constants.FIREBASE_USER_PROFILE_PIC).getValue(String.class));
+                            singleChatAdd.setIsOnline(ds.child(Constants.FIREBASE_USER_IS_ONLINE).getValue(String.class));
+                            singleChatAdd.setName(phoneToNameMap.get(phoneNum));
                             singleChatAdd.setPhoneNum(phoneNum);
                             chatList.add(0, singleChatAdd);
                             chatListAdapter.notifyDataSetChanged();
@@ -132,7 +173,7 @@ public class ChatListFragment extends Fragment {
             public void onChildChanged(final @NonNull DataSnapshot dataSnapshot, String s) {
 
                 final User singleChatChange = dataSnapshot.getValue(User.class);
-                Log.d("ChatChange", s + " " + dataSnapshot.getValue().toString());
+                Log.d(TAG, "ChatChange" + s + " " + dataSnapshot.getValue().toString());
                 String uid = dataSnapshot.getKey();
 
                 if (chatList.size() == 0) {
@@ -195,7 +236,7 @@ public class ChatListFragment extends Fragment {
             if (tempUid.equals(uid)) {
                 int index = iterator.nextIndex();
 
-                Log.d("ChatChange", chatList.get(index - 1).toString());
+                Log.d(TAG, "ChatChange" + chatList.get(index - 1).toString());
                 tempFlag = 1;
 
                 if (chatList.get(index - 1).getTimestamp() == singleChatChange.getTimestamp()) {

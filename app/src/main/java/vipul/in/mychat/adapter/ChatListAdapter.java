@@ -44,6 +44,8 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
     Context mContext;
     List<User> singleChats;
     private Activity activity;
+    private OnThumbnailClickListener onThumbnailClickListener;
+    private OnItemClickListener onItemClickListener;
 
     public ChatListAdapter(Context context, List<User> singleChats, Activity activity) {
 
@@ -53,17 +55,26 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
 
     }
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public void setOnThumbnailClickListener(OnThumbnailClickListener onThumbnailClickListener) {
+        this.onThumbnailClickListener = onThumbnailClickListener;
+    }
+
+    @NonNull
     @Override
-    public ChatListViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ChatListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        View view = layoutInflater.inflate(R.layout.user, null);
+        View view = layoutInflater.inflate(R.layout.user, parent, false);
 
         return new ChatListViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ChatListViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ChatListViewHolder holder, int position) {
 
         final User singleChat = singleChats.get(position);
         holder.name_from.setText(singleChat.getName());
@@ -72,16 +83,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         if (Constants.DEFAULT_PROFILE_PICTURE.equals(singleChat.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
-            Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
-                }
-            });
+            Picasso.get().load(Uri.parse(singleChat.getThumb_pic())).into(holder.thumbnail);
         }
 
         if ("true".equals(singleChat.getIsOnline())) {
@@ -90,79 +92,6 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             holder.onlineIndicator.setImageResource(R.drawable.offline);
         }
 
-        holder.thumbnail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
-                imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, singleChat.getProfile_pic());
-                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, singleChat.getName());
-                imageDialogIntent.putExtra(Constants.RECEIVER_UID_EXTRA, singleChat.getUid());
-
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.thumbnail, "image_transition");
-
-                activity.startActivity(imageDialogIntent, options.toBundle());
-                activity.overridePendingTransition(0, 0);
-            }
-        });
-
-        holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                final Rect viewRect = new Rect();
-                view.getGlobalVisibleRect(viewRect);
-
-                Transition explode = new Explode();
-                explode.setEpicenterCallback(new Transition.EpicenterCallback() {
-                    @Override
-                    public Rect onGetEpicenter(@NonNull Transition transition) {
-                        return viewRect;
-                    }
-                });
-                explode.excludeTarget(view, true);
-                explode.addListener(new Transition.TransitionListener() {
-                    @Override
-                    public void onTransitionStart(@NonNull Transition transition) {
-                        Log.d("ChatListAdapter", transition.getName() + " start");
-                    }
-
-                    @Override
-                    public void onTransitionEnd(@NonNull Transition transition) {
-                        Log.d("ChatListAdapter", transition.getName() + " end");
-                        Intent intent = new Intent(activity, ChatActivity.class);
-                        intent.putExtra("clicked", singleChat.getName());
-                        intent.putExtra("uid", singleChat.getUid());
-                        intent.putExtra("friendThumb", singleChat.getThumb_pic());
-                        intent.putExtra("friendProfilePic", singleChat.getProfile_pic());
-                        activity.startActivity(intent);
-                    }
-
-                    @Override
-                    public void onTransitionCancel(@NonNull Transition transition) {
-
-                    }
-
-                    @Override
-                    public void onTransitionPause(@NonNull Transition transition) {
-
-                    }
-
-                    @Override
-                    public void onTransitionResume(@NonNull Transition transition) {
-
-                    }
-                });
-
-                explode.setDuration(2000);
-                explode.setInterpolator(new AccelerateDecelerateInterpolator());
-
-                TransitionManager.beginDelayedTransition(
-                        (ViewGroup) activity.getWindow().getDecorView().getRootView(),
-                        explode
-                );
-
-            }
-        });
     }
 
     @Override
@@ -185,6 +114,28 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             thumbnail = itemView.findViewById(R.id.user_single_image);
             last_message = itemView.findViewById(R.id.user_msg_or_contact);
             onlineIndicator = itemView.findViewById(R.id.online_indicator);
+            relativeLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(onItemClickListener != null)
+                        onItemClickListener.onItemClicked(v, singleChats.get(getAdapterPosition()));
+                }
+            });
+            thumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(onThumbnailClickListener != null)
+                        onThumbnailClickListener.onThumbnailClicked(v, singleChats.get(getAdapterPosition()));
+                }
+            });
         }
+    }
+
+    public interface OnThumbnailClickListener {
+        public void onThumbnailClicked(View v, User selectedUser);
+    }
+
+    public interface OnItemClickListener {
+        public void onItemClicked(View v, User selectedUser);
     }
 }

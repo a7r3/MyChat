@@ -25,7 +25,6 @@ public class ImageDialogActivity extends AppCompatActivity {
 
     public static final String CHAT_NAME_EXTRA = "chat_name";
     public static final String IMAGE_URI_EXTRA = "chat_profile_image_uri";
-    public static final String IMAGE_EXTRA = "imamge";
     private View imageDialogDetails;
     private TextView imageDialogChatName;
     private ImageView imageDialogProfilePicture;

@@ -62,6 +62,7 @@ import vipul.in.mychat.util.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = getClass().getSimpleName();
     private final int GALLERY_PICK = 99;
     //Button mBtn;
     //TextView mTextView;
@@ -325,14 +326,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("Main", "onStart");
+        Log.d(TAG, "onStart");
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("Tag", "mainActivity_onPause");
+        Log.d(TAG, "mainActivity_onPause");
         if (currentUser != null) {
             FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child("isOnline").setValue("false");
             FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
@@ -356,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == GALLERY_PICK && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
 
-            Log.d("image_uri",imageUri.toString());
+            Log.d(TAG, imageUri.toString());
 
 
             CropImage.activity(imageUri)
@@ -383,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Uri resultUri = result.getUri();
 
-                Log.d("image_uri",resultUri.toString());
+                Log.d(TAG, resultUri.toString());
 
                 File thumb_filePath = new File(resultUri.getPath());
 

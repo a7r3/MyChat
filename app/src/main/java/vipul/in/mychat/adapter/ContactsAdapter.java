@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,6 +33,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
     private Context context;
     private List<User> contactsList;
     private Activity activity;
+    private OnItemClickListener onItemClickListener;
+    private OnThumbnailClickListener onThumbnailClickListener;
 
     public ContactsAdapter(Activity activity, Context context, List<User> contactsList) {
         this.activity = activity;
@@ -39,15 +42,24 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         this.contactsList = contactsList;
     }
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public void setOnThumbnailClickListener(OnThumbnailClickListener onThumbnailClickListener) {
+        this.onThumbnailClickListener = onThumbnailClickListener;
+    }
+
+    @NonNull
     @Override
-    public ContactsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ContactsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.user, parent, false);
         return new ContactsViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ContactsViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ContactsViewHolder holder, int position) {
 
         final User contacts = contactsList.get(position);
         holder.name_from.setText(contacts.getName());
@@ -60,7 +72,7 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
         }
 
 
-        if ("default".equals(contacts.getThumb_pic())) {
+        if (Constants.DEFAULT_PROFILE_PICTURE.equals(contacts.getThumb_pic())) {
             holder.thumbnail.setImageResource(R.drawable.ic_person_black_24dp);
         } else {
             Picasso.get().load(Uri.parse(contacts.getThumb_pic())).networkPolicy(NetworkPolicy.OFFLINE).into(holder.thumbnail, new Callback() {
@@ -75,34 +87,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
                 }
             });
         }
-
-        holder.relativeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity, ChatActivity.class);
-                intent.putExtra("clicked", holder.name_from.getText().toString());
-                intent.putExtra("uid", contacts.getUid());
-                intent.putExtra("friendThumb", contacts.getThumb_pic());
-                intent.putExtra("friendProfilePic", contacts.getProfile_pic());
-                Log.d("Key", "Key: " + contacts.getUid());
-                activity.startActivity(intent);
-            }
-        });
-
-        holder.thumbnail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent imageDialogIntent = new Intent(activity, ImageDialogActivity.class);
-                imageDialogIntent.putExtra(ImageDialogActivity.IMAGE_URI_EXTRA, contacts.getProfile_pic());
-                imageDialogIntent.putExtra(ImageDialogActivity.CHAT_NAME_EXTRA, contacts.getName());
-                imageDialogIntent.putExtra(Constants.RECEIVER_UID_EXTRA, contacts.getUid());
-
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, holder.thumbnail, "image_transition");
-
-                activity.startActivity(imageDialogIntent, options.toBundle());
-                activity.overridePendingTransition(0, 0);
-            }
-        });
 
     }
 
@@ -126,6 +110,29 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
             last_message = itemView.findViewById(R.id.user_msg_or_contact);
             onlineIndicator = itemView.findViewById(R.id.online_indicator);
             thumbnail = itemView.findViewById(R.id.user_single_image);
+            relativeLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(onItemClickListener != null)
+                        onItemClickListener.onItemClicked(v, contactsList.get(getAdapterPosition()));
+                }
+            });
+
+            thumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(onThumbnailClickListener != null)
+                        onThumbnailClickListener.onThumbnailClicked(v, contactsList.get(getAdapterPosition()));
+                }
+            });
         }
+    }
+
+    public interface OnThumbnailClickListener {
+        public void onThumbnailClicked(View v, User selectedUser);
+    }
+
+    public interface OnItemClickListener {
+        public void onItemClicked(View v, User selectedUser);
     }
 }
