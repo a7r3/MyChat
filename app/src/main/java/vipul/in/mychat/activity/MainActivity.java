@@ -76,20 +76,20 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference mRef;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-    private FirebaseAuth mAuth;
-    private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
-    private FirebaseUser currentUser;
-    private InterstitialAd mInterstitialAd;
     @BindView(R.id.tabLayout)
     TabLayout tabLayout;
     @BindView(R.id.viewPager)
     ViewPager viewPager;
-    private BottomSheetDialog profileBottomSheetDialog;
-    private BottomSheetDialog settingsBottomSheetDialog;
     @BindView(R.id.main_profile)
     CircleImageView profileView;
     @BindView(R.id.main_settings)
     ImageView settingsView;
+    private FirebaseAuth mAuth;
+    private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
+    private FirebaseUser currentUser;
+    private InterstitialAd mInterstitialAd;
+    private BottomSheetDialog profileBottomSheetDialog;
+    private BottomSheetDialog settingsBottomSheetDialog;
     private DatabaseReference databaseReference;
     private View profileBottomSheetView;
     private CircleImageView profileBottomSheetImage;
@@ -434,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
                                                         if (task.isSuccessful()) {
                                                             mProgressDialog.dismiss();
 
-                                                            editor.putString("profile_pic",uri.toString());
+                                                            editor.putString("profile_pic", uri.toString());
 //                                                            editor.putString("thumb_pic", thumb_downloadUrl);
                                                             editor.apply();
 

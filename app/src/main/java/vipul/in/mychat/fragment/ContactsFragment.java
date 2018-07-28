@@ -4,10 +4,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
-
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,29 +34,23 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
+import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.activity.ImageDialogActivity;
-import vipul.in.mychat.util.Constants;
-import vipul.in.mychat.util.MarginDividerItemDecoration;
-import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ContactsAdapter;
 import vipul.in.mychat.model.User;
+import vipul.in.mychat.util.Constants;
+import vipul.in.mychat.util.MarginDividerItemDecoration;
 
 
 public class ContactsFragment extends Fragment {
 
-    DatabaseReference friendsDatabase;
     private final String TAG = getClass().getSimpleName();
+    DatabaseReference friendsDatabase;
     private DatabaseReference userDatabaseReference;
     private ContactsAdapter adapter;
     private List<User> userList;
@@ -257,7 +249,7 @@ public class ContactsFragment extends Fragment {
             return null;
         }
     }
-    
+
 //    /**
 //     * Saves Profile Pictures / Thumbnails of the User to Internal/External Storage
 //     *

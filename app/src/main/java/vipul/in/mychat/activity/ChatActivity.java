@@ -69,6 +69,8 @@ import vipul.in.mychat.util.Constants;
 
 public class ChatActivity extends AppCompatActivity implements RewardedVideoAdListener {
 
+    private final String TAG = getClass().getSimpleName();
+    private final List<Message> msgList = new ArrayList<>();
     TextView receiverName;
     TextView receiverLastSeen;
     @BindView(R.id.imageButton)
@@ -87,27 +89,21 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     ImageButton sendAttach;
     @BindView(R.id.chat_activity_move_to_bottom)
     FloatingActionButton moveToBottomButton;
-
     CircleImageView chatProfileImage;
     LinearLayoutManager linearLayoutManager;
-
     // Profile Bottom Sheet
     View profileBottomSheetView;
     CircleImageView profileBottomSheetImage;
     TextView profileBottomSheetName;
     TextView profileBottomSheetStatus;
     FloatingActionButton imageSelectorButton;
-
     BottomSheetDialog profileBottomSheetDialog;
-
     private String receiverUid;
     private boolean typingStarted;
     private DatabaseReference mRef, rootDatabaseReference, myReference;
     private SharedPreferences sharedPreferences;
     private InterstitialAd mInterstitialAd;
     private RewardedVideoAd mRewardedVideoAd;
-    private final String TAG = getClass().getSimpleName();
-    private final List<Message> msgList = new ArrayList<>();
     private String receiverNameExtra;
     private Boolean friendTyping = false;
     private DatabaseReference userDatabaseReference;
@@ -234,7 +230,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
             }
 
-            });
+        });
 
         chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -249,9 +245,9 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                 // Show the Move-To-Last-Message FAB
                 // If the last visible item in the list is the last item itself
                 // Hide the Move-To-Last-Message FAB
-                if(messageAdapter.getItemCount() - 2 == linearLayoutManager.findLastVisibleItemPosition())
+                if (messageAdapter.getItemCount() - 2 == linearLayoutManager.findLastVisibleItemPosition())
                     moveToBottomButton.show();
-                else if(messageAdapter.getItemCount() - 1 == linearLayoutManager.findLastVisibleItemPosition())
+                else if (messageAdapter.getItemCount() - 1 == linearLayoutManager.findLastVisibleItemPosition())
                     moveToBottomButton.hide();
             }
         });
@@ -339,7 +335,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
         setSupportActionBar(chat_toolbar);
 
-        if(getSupportActionBar() != null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowCustomEnabled(true);
@@ -635,10 +631,10 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == 55 && resultCode == RESULT_OK) {
+        if (requestCode == 55 && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
-            
-            if(imageUri == null) {
+
+            if (imageUri == null) {
                 Toast.makeText(this, "No Image Selected", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -650,12 +646,12 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
 
             final String pushId = user_message_push.getKey();
 
-            final StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("message_images").child(pushId+".jpg");
+            final StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("message_images").child(pushId + ".jpg");
 
             storageReference.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if(task.isSuccessful()) {
+                    if (task.isSuccessful()) {
                         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
@@ -690,7 +686,7 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
                                 rootDatabaseReference.updateChildren(messageUserMap, new DatabaseReference.CompletionListener() {
                                     @Override
                                     public void onComplete(@NonNull DatabaseError databaseError, DatabaseReference databaseReference) {
-                                        if(databaseError != null)
+                                        if (databaseError != null)
                                             Log.e(TAG, "sendMessage : " + databaseError.getMessage());
                                     }
                                 });

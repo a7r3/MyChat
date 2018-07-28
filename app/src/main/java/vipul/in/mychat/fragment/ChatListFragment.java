@@ -3,13 +3,9 @@ package vipul.in.mychat.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.transition.Explode;
-import android.support.transition.Transition;
-import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +14,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -29,25 +24,18 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Observable;
 
+import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.activity.ImageDialogActivity;
-import vipul.in.mychat.util.Constants;
-import vipul.in.mychat.util.MarginDividerItemDecoration;
-import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ChatListAdapter;
 import vipul.in.mychat.model.User;
+import vipul.in.mychat.util.Constants;
+import vipul.in.mychat.util.MarginDividerItemDecoration;
 
 
 public class ChatListFragment extends Fragment {

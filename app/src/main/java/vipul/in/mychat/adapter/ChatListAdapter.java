@@ -3,26 +3,16 @@ package vipul.in.mychat.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.transition.Explode;
-import android.support.transition.Transition;
-import android.support.transition.TransitionManager;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -31,8 +21,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
-import vipul.in.mychat.activity.ChatActivity;
-import vipul.in.mychat.activity.ImageDialogActivity;
 import vipul.in.mychat.model.User;
 import vipul.in.mychat.util.Constants;
 
@@ -101,6 +89,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         return singleChats.size();
     }
 
+    public interface OnThumbnailClickListener {
+        public void onThumbnailClicked(View v, User selectedUser);
+    }
+
+    public interface OnItemClickListener {
+        public void onItemClicked(View v, User selectedUser);
+    }
+
     public class ChatListViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.relativeSingleChat)
@@ -121,25 +117,17 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             relativeLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(onItemClickListener != null)
+                    if (onItemClickListener != null)
                         onItemClickListener.onItemClicked(v, singleChats.get(getAdapterPosition()));
                 }
             });
             thumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(onThumbnailClickListener != null)
+                    if (onThumbnailClickListener != null)
                         onThumbnailClickListener.onThumbnailClicked(v, singleChats.get(getAdapterPosition()));
                 }
             });
         }
-    }
-
-    public interface OnThumbnailClickListener {
-        public void onThumbnailClicked(View v, User selectedUser);
-    }
-
-    public interface OnItemClickListener {
-        public void onItemClicked(View v, User selectedUser);
     }
 }

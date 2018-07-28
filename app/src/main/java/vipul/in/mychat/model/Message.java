@@ -26,16 +26,16 @@ public class Message {
         this.type = "text";
     }
 
-    public void setLastMessage(boolean lastMessage) {
-        isLastMessage = lastMessage;
+    public Message() {
+        super();
     }
 
     public boolean isLastMessage() {
         return isLastMessage;
     }
 
-    public Message() {
-        super();
+    public void setLastMessage(boolean lastMessage) {
+        isLastMessage = lastMessage;
     }
 
     public String getMessage() {

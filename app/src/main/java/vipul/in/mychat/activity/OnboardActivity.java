@@ -49,7 +49,6 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -62,6 +61,14 @@ import vipul.in.mychat.util.UtilityMethods;
 
 public class OnboardActivity extends AppCompatActivity {
 
+    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
+    private final int ASK_PHONE_NUMBER = 0;
+    private final int ASK_OTP = 1;
+    private final int ASK_USER_NAME = 2;
+    private final int ASK_STATUS = 3;
+    private final int ASK_PROFILE_PICTURE = 4;
+    private final int FINAL_DESTINATION = 5;
+    private final String TAG = getClass().getSimpleName();
     @BindView(R.id.onboard_recycler_view)
     RecyclerView onboardRecyclerView;
     @BindView(R.id.country_code_picker)
@@ -74,15 +81,6 @@ public class OnboardActivity extends AppCompatActivity {
     ImageButton sendMessageButton;
     @BindView(R.id.onboard_network_status)
     TextView onboardNetworkStatusText;
-
-    private static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
-    private final int ASK_PHONE_NUMBER = 0;
-    private final int ASK_OTP = 1;
-    private final int ASK_USER_NAME = 2;
-    private final int ASK_STATUS = 3;
-    private final int ASK_PROFILE_PICTURE = 4;
-    private final int FINAL_DESTINATION = 5;
-    private final String TAG = getClass().getSimpleName();
     private List<Message> onboardConversation = new ArrayList<>();
     private MessageAdapter messageAdapter;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -93,6 +91,7 @@ public class OnboardActivity extends AppCompatActivity {
 
     // Onboarding would be like a conversation!
     private int onboardStage = 0;
+    private Disposable disposable;
 
     /**
      * Sends a message in the context of the Bot (the other member of this chat)
@@ -268,8 +267,6 @@ public class OnboardActivity extends AppCompatActivity {
         disposable.dispose();
     }
 
-    private Disposable disposable;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -324,7 +321,7 @@ public class OnboardActivity extends AppCompatActivity {
                 .doOnNext(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        if(!UtilityMethods.isNetworkAvailable(OnboardActivity.this)) {
+                        if (!UtilityMethods.isNetworkAvailable(OnboardActivity.this)) {
                             onboardNetworkStatusText.setText("You are Offline");
                             onboardNetworkStatusText.setBackgroundColor(Color.parseColor("#F44336"));
                         } else {

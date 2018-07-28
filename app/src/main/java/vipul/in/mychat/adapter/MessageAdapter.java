@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Callback;
@@ -27,11 +26,10 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
-import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import vipul.in.mychat.R;
+import vipul.in.mychat.model.Message;
 import vipul.in.mychat.util.Constants;
 import vipul.in.mychat.util.UtilityMethods;
-import vipul.in.mychat.model.Message;
 
 /**
  * Created by vipul on 22/1/18.
@@ -39,13 +37,13 @@ import vipul.in.mychat.model.Message;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
+    private final String TAG = getClass().getSimpleName();
+    public boolean isSendButtonUsed = false;
     private Context context;
     private List<Message> messageList;
     private String myThumb, friendThumb;
     private String latestDate = null;
     private RecyclerView recyclerView;
-    private final String TAG = getClass().getSimpleName();
-    public boolean isSendButtonUsed = false;
     private Calendar calendar = Calendar.getInstance();
     private SimpleDateFormat timeFormatPattern = new SimpleDateFormat("hh:mm a", Locale.getDefault());
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
@@ -83,15 +81,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // Use the formatter to get the Date, with the format specified earlier
         String date = dateFormat.format(calendar.getTime());
 
-        if(isSendButtonUsed) {
-            if(messageList.get(getItemCount() - 1).getFrom().equals(message.getFrom())) {
+        if (isSendButtonUsed) {
+            if (messageList.get(getItemCount() - 1).getFrom().equals(message.getFrom())) {
                 ((MessageViewHolder) recyclerView
                         .findViewHolderForAdapterPosition(getItemCount() - 1))
                         .profileImage
                         .setVisibility(View.INVISIBLE);
             }
         }
-
 
         // Add the message as usual
         messageList.add(message);
@@ -172,10 +169,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             // Show Profile Picture only when the next message is of the other user
             String currentMessageUser = message.getFrom();
             ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) messageBubble.getLayoutParams();
-            if(getAdapterPosition() != getItemCount() - 1) {
+            if (getAdapterPosition() != getItemCount() - 1) {
                 String nextMessageUser = messageList.get(getAdapterPosition() + 1).getFrom();
                 params.bottomMargin = (int) UtilityMethods.convertDpToPixel(4.0f, context);
-                if(!currentMessageUser.equals(nextMessageUser)) {
+                if (!currentMessageUser.equals(nextMessageUser)) {
                     params.bottomMargin = (int) UtilityMethods.convertDpToPixel(8.0f, context);
                     messageBubble.setLayoutParams(params);
                     profileImage.setVisibility(View.VISIBLE);

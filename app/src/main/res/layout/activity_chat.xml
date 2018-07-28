@@ -35,13 +35,13 @@
         android:id="@+id/chat_activity_move_to_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:fabSize="mini"
         android:layout_above="@id/sendMsgLine"
-        android:visibility="gone"
         android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_expand_more_black_24dp"
-        android:layout_marginBottom="16dp"/>
+        android:visibility="gone"
+        app:fabSize="mini" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/sendMsgLine"
