@@ -83,10 +83,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         // Use the formatter to get the Date, with the format specified earlier
         String date = dateFormat.format(calendar.getTime());
 
-        // Add the message as usual
-        messageList.add(message);
-        notifyItemInserted(messageList.size() - 1);
-
         if(isSendButtonUsed) {
             if(messageList.get(getItemCount() - 1).getFrom().equals(message.getFrom())) {
                 ((MessageViewHolder) recyclerView
@@ -95,6 +91,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         .setVisibility(View.INVISIBLE);
             }
         }
+
+
+        // Add the message as usual
+        messageList.add(message);
+        notifyItemInserted(messageList.size() - 1);
 
         // If this is the first message, the Date View should appear obviously
         if (latestDate == null) {
