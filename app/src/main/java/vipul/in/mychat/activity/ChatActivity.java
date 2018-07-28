@@ -748,7 +748,6 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
