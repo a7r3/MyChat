@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="?android:selectableItemBackgroundBorderless"
     android:padding="8dp">
 
@@ -16,7 +16,7 @@
         android:id="@+id/chatPersonName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_toEndOf="@id/chatProfilePicture"
         android:includeFontPadding="false"
         android:text="Chat Person"
@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/chatPersonName"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_toEndOf="@id/chatProfilePicture"
         android:text="Today at 00:00"
         android:textColor="#B9B9B9"

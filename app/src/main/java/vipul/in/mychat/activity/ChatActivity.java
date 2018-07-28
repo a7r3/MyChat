@@ -256,6 +256,8 @@ public class ChatActivity extends AppCompatActivity implements RewardedVideoAdLi
             }
         });
 
+        chatRecyclerView.setHasFixedSize(false);
+
         // Pressing this button would smooth scroll the message list to the last message
         moveToBottomButton.setOnClickListener(new View.OnClickListener() {
             @Override

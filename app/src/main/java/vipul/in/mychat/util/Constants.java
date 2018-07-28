@@ -44,4 +44,8 @@ public class Constants {
     // "Friends" node
     public static final String FIREBASE_FRIENDS_NODE = "Friends";
     public static final String FIREBASE_FRIENDS_NAME = "name";
+
+    // Chat Types
+    public static final String MESSAGE_TYPE_IMAGE = "image";
+    public static final String MESSAGE_TYPE_TEXT = "text";
 }
