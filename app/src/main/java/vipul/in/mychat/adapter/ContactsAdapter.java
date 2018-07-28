@@ -21,6 +21,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
@@ -98,18 +100,20 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Contac
 
     public class ContactsViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.relativeSingleChat)
         RelativeLayout relativeLayout;
-        TextView name_from, last_message;
+        @BindView(R.id.user_name)
+        TextView name_from;
+        @BindView(R.id.user_msg_or_contact)
+        TextView last_message;
+        @BindView(R.id.online_indicator)
         ImageView onlineIndicator;
+        @BindView(R.id.user_single_image)
         CircleImageView thumbnail;
 
         public ContactsViewHolder(View itemView) {
             super(itemView);
-            relativeLayout = itemView.findViewById(R.id.relativeSingleChat);
-            name_from = itemView.findViewById(R.id.user_name);
-            last_message = itemView.findViewById(R.id.user_msg_or_contact);
-            onlineIndicator = itemView.findViewById(R.id.online_indicator);
-            thumbnail = itemView.findViewById(R.id.user_single_image);
+            ButterKnife.bind(this, itemView);
             relativeLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

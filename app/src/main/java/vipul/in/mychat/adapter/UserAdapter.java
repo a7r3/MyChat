@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import butterknife.BindView;
 import vipul.in.mychat.R;
 import vipul.in.mychat.activity.ChatActivity;
 import vipul.in.mychat.model.User;
@@ -76,17 +77,17 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     class UserViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.relativeSingleChat)
         RelativeLayout relativeLayout;
+        @BindView(R.id.user_name)
         TextView userNameText;
+        @BindView(R.id.user_msg_or_contact)
         TextView lastMessageOrNumberText;
+        @BindView(R.id.online_indicator)
         ImageView onlineIndicator;
 
         UserViewHolder(View itemView) {
             super(itemView);
-            relativeLayout = itemView.findViewById(R.id.relativeSingleChat);
-            userNameText = itemView.findViewById(R.id.user_name);
-            lastMessageOrNumberText = itemView.findViewById(R.id.user_msg_or_contact);
-            onlineIndicator = itemView.findViewById(R.id.online_indicator);
             relativeLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

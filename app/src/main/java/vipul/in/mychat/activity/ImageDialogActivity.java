@@ -18,6 +18,8 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import vipul.in.mychat.R;
 import vipul.in.mychat.util.Constants;
 
@@ -25,12 +27,17 @@ public class ImageDialogActivity extends AppCompatActivity {
 
     public static final String CHAT_NAME_EXTRA = "chat_name";
     public static final String IMAGE_URI_EXTRA = "chat_profile_image_uri";
-    private View imageDialogDetails;
-    private TextView imageDialogChatName;
-    private ImageView imageDialogProfilePicture;
-    private ImageView imageDialogRedirectChat;
-    private View imageDialog;
-    private ViewGroup viewGroup;
+
+    @BindView(R.id.image_dialog_chat_actions)
+    View imageDialogDetails;
+    @BindView(R.id.image_dialog_chat_name)
+    TextView imageDialogChatName;
+    @BindView(R.id.image_dialog_chat_profile_picture)
+    ImageView imageDialogProfilePicture;
+    @BindView(R.id.image_dialog_chat_redirect_button)
+    ImageView imageDialogRedirectChat;
+    @BindView(R.id.image_dialog)
+    View imageDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,12 +45,7 @@ public class ImageDialogActivity extends AppCompatActivity {
         postponeEnterTransition();
         setContentView(R.layout.image_dialog_layout);
 
-        imageDialogDetails = findViewById(R.id.image_dialog_chat_actions);
-        imageDialogProfilePicture = findViewById(R.id.image_dialog_chat_profile_picture);
-        imageDialogRedirectChat = findViewById(R.id.image_dialog_chat_redirect_button);
-        imageDialogChatName = findViewById(R.id.image_dialog_chat_name);
-        imageDialog = findViewById(R.id.image_dialog);
-
+        ButterKnife.bind(this);
         final String receiverUid = getIntent().getStringExtra(Constants.RECEIVER_UID_EXTRA);
         final String chatName = getIntent().getStringExtra(CHAT_NAME_EXTRA);
         final String imageUri = getIntent().getStringExtra(IMAGE_URI_EXTRA);
@@ -69,9 +71,7 @@ public class ImageDialogActivity extends AppCompatActivity {
 
         startPostponedEnterTransition();
 
-        viewGroup = findViewById(android.R.id.content);
-
-        // TransitionManager.beginDelayedTransition(viewGroup);
+        // TransitionManager.beginDelayedTransition(findViewById(android.R.id.content));
         imageDialogDetails.setVisibility(View.VISIBLE);
     }
 

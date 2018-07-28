@@ -51,9 +51,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import id.zelory.compressor.Compressor;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import vipul.in.mychat.R;
 import vipul.in.mychat.adapter.ViewPagerAdapter;
 import vipul.in.mychat.fragment.ChatListFragment;
@@ -73,12 +80,16 @@ public class MainActivity extends AppCompatActivity {
     private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
     private FirebaseUser currentUser;
     private InterstitialAd mInterstitialAd;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
+    @BindView(R.id.tabLayout)
+    TabLayout tabLayout;
+    @BindView(R.id.viewPager)
+    ViewPager viewPager;
     private BottomSheetDialog profileBottomSheetDialog;
     private BottomSheetDialog settingsBottomSheetDialog;
-    private CircleImageView profileView;
-    private ImageView settingsView;
+    @BindView(R.id.main_profile)
+    CircleImageView profileView;
+    @BindView(R.id.main_settings)
+    ImageView settingsView;
     private DatabaseReference databaseReference;
     private View profileBottomSheetView;
     private CircleImageView profileBottomSheetImage;
@@ -94,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
@@ -101,13 +114,10 @@ public class MainActivity extends AppCompatActivity {
 
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
 
-        viewPager = findViewById(R.id.viewPager);
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId("ca-app-pub-6712400715312717/2525168130");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-        profileView = findViewById(R.id.main_profile);
-        settingsView = findViewById(R.id.main_settings);
 
         profileBottomSheetView = LayoutInflater.from(this).inflate(R.layout.profile_bottom_sheet, null);
 
@@ -286,27 +296,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        tabLayout = findViewById(R.id.tabLayout);
-
         viewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(viewPager);
 
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                viewPager.setCurrentItem(position, false);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
         setupViewPager(viewPager);
 
     }
@@ -314,7 +306,6 @@ public class MainActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager viewPager) {
 
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
         contacts = new ContactsFragment();
         chatListFragment = new ChatListFragment();
         adapter.addFragment(chatListFragment, "CHATS");
@@ -345,6 +336,17 @@ public class MainActivity extends AppCompatActivity {
         if (!isSnackBarShown) {
             Snackbar.make(getWindow().getDecorView().getRootView(), "Press back again to exit", Snackbar.LENGTH_LONG).show();
             isSnackBarShown = true;
+            Observable.interval(0, 5, TimeUnit.SECONDS)
+                    .take(1)
+                    .doOnNext(new Consumer<Long>() {
+                        @Override
+                        public void accept(Long aLong) throws Exception {
+                            isSnackBarShown = false;
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe();
         } else {
             super.onBackPressed();
         }

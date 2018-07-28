@@ -20,10 +20,12 @@
         android:layout_toEndOf="@id/chatProfilePicture"
         android:includeFontPadding="false"
         android:text="Chat Person"
+        android:textStyle="bold"
         android:textColor="#ffffff"
-        android:textSize="17sp" />
+        android:textSize="18sp" />
 
     <TextView
+        android:layout_marginTop="2dp"
         android:id="@+id/chatLastSeen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,7 +33,7 @@
         android:layout_marginStart="16dp"
         android:layout_toEndOf="@id/chatProfilePicture"
         android:text="Today at 00:00"
-        android:textColor="#B9B9B9"
+        android:textColor="#ffffff"
         android:textSize="12sp" />
 
 </RelativeLayout>
