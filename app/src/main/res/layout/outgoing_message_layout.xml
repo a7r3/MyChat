@@ -70,7 +70,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:src="@drawable/ic_person_black_24dp"
             android:visibility="gone"
             app:layout_constrainedHeight="true"
             app:layout_constrainedWidth="true"
