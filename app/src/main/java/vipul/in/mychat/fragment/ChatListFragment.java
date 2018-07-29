@@ -3,9 +3,13 @@ package vipul.in.mychat.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.transition.Explode;
+import android.support.transition.Transition;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -92,6 +97,21 @@ public class ChatListFragment extends Fragment {
                 intent.putExtra(Constants.RECEIVER_UID_EXTRA, singleChat.getUid());
                 intent.putExtra(Constants.SPREF_FRIEND_THUMB, singleChat.getThumb_pic());
                 intent.putExtra("friendProfilePic", singleChat.getProfile_pic());
+
+                final Rect r = new Rect();
+                view.getGlobalVisibleRect(r);
+
+                Transition explode = new Explode();
+                explode.setEpicenterCallback(new Transition.EpicenterCallback() {
+                    @Override
+                    public Rect onGetEpicenter(@NonNull Transition transition) {
+                        return r;
+                    }
+                });
+                explode.setDuration(2000);
+                explode.setInterpolator(new AccelerateDecelerateInterpolator());
+                TransitionManager.beginDelayedTransition((ViewGroup) Objects.requireNonNull(getActivity()).getWindow().getDecorView().getRootView(),
+                        explode);
                 startActivity(intent);
             }
         });

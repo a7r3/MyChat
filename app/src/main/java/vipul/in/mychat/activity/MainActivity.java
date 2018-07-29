@@ -14,8 +14,10 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.main_settings)
     ImageView settingsView;
     private FirebaseAuth mAuth;
-    private android.support.v4.app.Fragment contacts, chatListFragment, myProfile;
+    private Fragment contacts, chatListFragment, myProfile;
     private FirebaseUser currentUser;
     private InterstitialAd mInterstitialAd;
     private BottomSheetDialog profileBottomSheetDialog;
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        sharedPreferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(Constants.SPREF_USER_INFO, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
         MobileAds.initialize(this, "ca-app-pub-6712400715312717~1651070161");
@@ -142,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String status_value = profileBottomSheetStatus.getText().toString();
 
-                final android.app.Dialog settingsDialog = new android.app.Dialog(MainActivity.this);
+                final Dialog settingsDialog = new Dialog(MainActivity.this);
 
                 settingsDialog.getWindow().requestFeature(android.view.Window.FEATURE_NO_TITLE);
                 View myView = LayoutInflater.from(MainActivity.this).inflate(R.layout.statusdialog, null);
@@ -156,8 +158,12 @@ public class MainActivity extends AppCompatActivity {
                 submitStatus.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (!newStatus.getText().toString().equals(null) && !newStatus.getText().toString().equals("")) {
-                            FirebaseDatabase.getInstance().getReference().child("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("status").setValue(newStatus.getText().toString());
+                        if (!TextUtils.isEmpty(newStatus.getText())) {
+                            FirebaseDatabase.getInstance().getReference()
+                                    .child(Constants.FIREBASE_USERS_NODE)
+                                    .child(currentUser.getUid())
+                                    .child(Constants.FIREBASE_USER_STATUS)
+                                    .setValue(newStatus.getText().toString());
                             settingsDialog.dismiss();
                         }
                     }
@@ -178,24 +184,23 @@ public class MainActivity extends AppCompatActivity {
 
                 final ImageView imageView = myView.findViewById(R.id.image_dialog_chat_profile_picture);
 
-                if ("default".equals(sharedPreferences.getString("profile_pic", "default"))) {
-                    imageView.setImageResource(R.drawable.ic_person_black_24dp);
-                } else {
-                    Picasso.get()
-                            .load(sharedPreferences.getString("profile_pic", "default"))
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(imageView, new Callback() {
-                                @Override
-                                public void onSuccess() {
+                Picasso.get()
+                        .load(sharedPreferences.getString(Constants.SPREF_USER_PROFILE_PICTURE, Constants.DEFAULT_PROFILE_PICTURE))
+                        .placeholder(R.drawable.ic_person_black_24dp)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(imageView, new Callback() {
+                            @Override
+                            public void onSuccess() {
 
-                                }
+                            }
 
-                                @Override
-                                public void onError(Exception e) {
-                                    Picasso.get().load(sharedPreferences.getString("profile_pic", "default")).into(imageView);
-                                }
-                            });
-                }
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get()
+                                        .load(sharedPreferences.getString(Constants.SPREF_USER_PROFILE_PICTURE, Constants.DEFAULT_PROFILE_PICTURE))
+                                        .into(imageView);
+                            }
+                        });
                 imgDialog.show();
             }
         });
@@ -204,67 +209,62 @@ public class MainActivity extends AppCompatActivity {
 
         final String curr_uid = user.getUid();
 
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(curr_uid);
+        databaseReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(curr_uid);
         databaseReference.keepSynced(true);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String name = dataSnapshot.child("name").getValue().toString();
-                final String image = dataSnapshot.child("profile_pic").getValue().toString();
-                String status = dataSnapshot.child("status").getValue().toString();
-                String thumb_image = dataSnapshot.child("thumb_pic").getValue().toString();
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String name = dataSnapshot.child(Constants.FIREBASE_USER_NAME).getValue().toString();
+                final String image = dataSnapshot.child(Constants.FIREBASE_USER_PROFILE_PIC).getValue().toString();
+                String status = dataSnapshot.child(Constants.FIREBASE_USER_STATUS).getValue().toString();
+                String thumb_image = dataSnapshot.child(Constants.FIREBASE_USER_THUMB_PIC).getValue().toString();
 
                 profileBottomSheetName.setText(name);
                 profileBottomSheetStatus.setText(status);
 
-                if (!image.equals("default")) {
-                    final Uri imageUri = Uri.parse(sharedPreferences.getString("profile_pic", "default"));
-                    Picasso.get()
-                            .load(imageUri)
-                            .placeholder(R.drawable.ic_person_black_24dp)
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(profileBottomSheetImage, new Callback() {
-                                @Override
-                                public void onSuccess() {
+                final Uri imageUri = Uri.parse(sharedPreferences.getString(Constants.SPREF_USER_PROFILE_PICTURE, Constants.DEFAULT_PROFILE_PICTURE));
+                Picasso.get()
+                        .load(imageUri)
+                        .placeholder(R.drawable.ic_person_black_24dp)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(profileBottomSheetImage, new Callback() {
+                            @Override
+                            public void onSuccess() {
 
-                                }
+                            }
 
-                                @Override
-                                public void onError(Exception e) {
-                                    Picasso.get()
-                                            .load(imageUri)
-                                            .placeholder(R.drawable.ic_person_black_24dp)
-                                            .into(profileBottomSheetImage);
-                                }
-                            });
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get()
+                                        .load(imageUri)
+                                        .placeholder(R.drawable.ic_person_black_24dp)
+                                        .into(profileBottomSheetImage);
+                            }
+                        });
 
-                    Picasso.get()
-                            .load(imageUri)
-                            .placeholder(R.drawable.ic_person_black_24dp)
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(profileView, new Callback() {
-                                @Override
-                                public void onSuccess() {
+                Picasso.get()
+                        .load(imageUri)
+                        .placeholder(R.drawable.ic_person_black_24dp)
+                        .networkPolicy(NetworkPolicy.OFFLINE)
+                        .into(profileView, new Callback() {
+                            @Override
+                            public void onSuccess() {
 
-                                }
+                            }
 
-                                @Override
-                                public void onError(Exception e) {
-                                    Picasso.get()
-                                            .load(imageUri)
-                                            .placeholder(R.drawable.ic_person_black_24dp)
-                                            .into(profileView);
-                                }
-                            });
-                } else {
-                    profileBottomSheetImage.setImageResource(R.drawable.ic_person_black_24dp);
-                    profileView.setImageResource(R.drawable.ic_person_black_24dp);
-                }
+                            @Override
+                            public void onError(Exception e) {
+                                Picasso.get()
+                                        .load(imageUri)
+                                        .placeholder(R.drawable.ic_person_black_24dp)
+                                        .into(profileView);
+                            }
+                        });
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
@@ -282,7 +282,6 @@ public class MainActivity extends AppCompatActivity {
         profileBottomSheetDialog.setCanceledOnTouchOutside(true);
         profileBottomSheetDialog.setCancelable(true);
         profileBottomSheetDialog.setContentView(profileBottomSheetView);
-        profileBottomSheetDialog.getWindow().findViewById(R.id.design_bottom_sheet).setBackgroundColor(Color.TRANSPARENT);
 
         settingsBottomSheetDialog = new BottomSheetDialog(this);
         settingsBottomSheetDialog.setCanceledOnTouchOutside(true);
@@ -324,31 +323,31 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "mainActivity_onPause");
+        Log.d(TAG, "onPause");
         if (currentUser != null) {
-            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child("isOnline").setValue("false");
-            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid()).child("lastSeen").setValue(ServerValue.TIMESTAMP);
+            DatabaseReference userDetailReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_USERS_NODE).child(currentUser.getUid());
+            userDetailReference.child(Constants.FIREBASE_USER_IS_ONLINE).setValue("false");
+            userDetailReference.child(currentUser.getUid()).child(Constants.FIREBASE_USER_LASTSEEN).setValue(ServerValue.TIMESTAMP);
         }
     }
 
     @Override
     public void onBackPressed() {
         if (!isSnackBarShown) {
-            Snackbar.make(getWindow().getDecorView().getRootView(), "Press back again to exit", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(getWindow().getDecorView().getRootView(), "Press back again to exit", 3000).show();
             isSnackBarShown = true;
-            Observable.interval(0, 5, TimeUnit.SECONDS)
+            Observable.interval(3, 3, TimeUnit.SECONDS)
                     .take(1)
                     .doOnNext(new Consumer<Long>() {
                         @Override
                         public void accept(Long aLong) throws Exception {
+                            Log.d(TAG, "isSnackBarShown false");
                             isSnackBarShown = false;
                         }
                     })
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
                     .subscribe();
         } else {
-            super.onBackPressed();
+            finish();
         }
     }
 
@@ -358,10 +357,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == GALLERY_PICK && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
-
             Log.d(TAG, imageUri.toString());
-
-
             CropImage.activity(imageUri)
                     .setAspectRatio(1, 1)
                     .setMinCropWindowSize(500, 500)
